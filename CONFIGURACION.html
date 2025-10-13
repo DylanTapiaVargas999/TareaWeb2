@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Configuración - Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .link-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .link-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Guía de Configuración de Firebase</h1>
+        <p>Sigue estos pasos para configurar Firebase y hacer funcionar el sistema de préstamo de servidores.</p>
+
+        <div class="step">
+            <h3>Paso 1: Crear Proyecto en Firebase</h3>
+            <ol>
+                <li>Ve a <a href="https://console.firebase.google.com/" target="_blank" class="link-btn">Firebase Console</a></li>
+                <li>Haz clic en <strong>"Agregar proyecto"</strong></li>
+                <li>Ingresa un nombre para tu proyecto (ej: "prestamo-servidores")</li>
+                <li>Acepta los términos y haz clic en <strong>"Continuar"</strong></li>
+                <li>(Opcional) Activa Google Analytics</li>
+                <li>Haz clic en <strong>"Crear proyecto"</strong></li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Paso 2: Configurar Authentication</h3>
+            <ol>
+                <li>En el menú lateral, selecciona <strong>"Authentication"</strong></li>
+                <li>Haz clic en <strong>"Comenzar"</strong></li>
+                <li>En la pestaña <strong>"Sign-in method"</strong>, selecciona <strong>"Correo electrónico/Contraseña"</strong></li>
+                <li>Activa el interruptor y guarda</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Paso 3: Configurar Firestore Database</h3>
+            <ol>
+                <li>En el menú lateral, selecciona <strong>"Firestore Database"</strong></li>
+                <li>Haz clic en <strong>"Crear base de datos"</strong></li>
+                <li>Selecciona <strong>"Comenzar en modo de prueba"</strong> (para desarrollo)</li>
+                <li>Selecciona una ubicación (ej: us-central)</li>
+                <li>Haz clic en <strong>"Habilitar"</strong></li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Paso 4: Configurar Reglas de Firestore</h3>
+            <ol>
+                <li>En Firestore Database, ve a la pestaña <strong>"Reglas"</strong></li>
+                <li>Reemplaza las reglas con el siguiente código:</li>
+            </ol>
+            <div class="code-block">
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /alumnos/{alumnoId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /solicitudes/{solicitudId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+    }
+  }
+}
+            </div>
+            <li>Haz clic en <strong>"Publicar"</strong></li>
+        </div>
+
+        <div class="step">
+            <h3>Paso 5: Obtener Configuración del Proyecto</h3>
+            <ol>
+                <li>Haz clic en el ícono de configuración ⚙️ junto a "Descripción general del proyecto"</li>
+                <li>Selecciona <strong>"Configuración del proyecto"</strong></li>
+                <li>Desplázate hasta <strong>"Tus aplicaciones"</strong></li>
+                <li>Haz clic en el ícono <strong>"</>  Web"</strong></li>
+                <li>Registra la app con un apodo (ej: "prestamo-web")</li>
+                <li>Copia el código de configuración que aparece</li>
+            </ol>
+            <p>Verás algo como esto:</p>
+            <div class="code-block">
+const firebaseConfig = {
+  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:xxxxxxxxxxxxx"
+};
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 6: Actualizar la Configuración en tu Código</h3>
+            <ol>
+                <li>Abre los archivos: <code>index.html</code>, <code>alumno.html</code> y <code>admin.html</code></li>
+                <li>Busca la sección <code>const firebaseConfig = {</code></li>
+                <li>Reemplaza TODOS los valores que dicen "TU_API_KEY", etc. con tus valores reales</li>
+            </ol>
+            <div class="warning">
+                <strong>⚠️ Importante:</strong> Debes actualizar la configuración en los TRES archivos HTML.
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 7: Ejecutar el Proyecto</h3>
+            <p><strong>Opción A: Con Live Server (Recomendado)</strong></p>
+            <ol>
+                <li>Instala la extensión "Live Server" en VS Code</li>
+                <li>Haz clic derecho en <code>index.html</code></li>
+                <li>Selecciona <strong>"Open with Live Server"</strong></li>
+            </ol>
+            
+            <p><strong>Opción B: Con Python</strong></p>
+            <div class="code-block">
+cd c:\Users\USER\Desktop\ea
+python -m http.server 8000
+            </div>
+            <p>Luego abre: <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></p>
+        </div>
+
+        <div class="success">
+            <h3>✅ ¡Listo!</h3>
+            <p>Ahora puedes:</p>
+            <ul>
+                <li>Registrar alumnos en <code>index.html</code></li>
+                <li>Crear solicitudes en <code>alumno.html</code></li>
+                <li>Gestionar solicitudes en <code>admin.html</code></li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Solución de Problemas Comunes</h3>
+            <ul>
+                <li><strong>Error de CORS:</strong> Debes usar un servidor local (Live Server, Python, etc.)</li>
+                <li><strong>Firebase no conecta:</strong> Verifica que la configuración esté correcta</li>
+                <li><strong>Authentication falla:</strong> Asegúrate de activar "Email/Password" en Firebase</li>
+                <li><strong>No se guardan datos:</strong> Revisa las reglas de Firestore</li>
+            </ul>
+        </div>
+
+        <h2>📚 Recursos Adicionales</h2>
+        <ul>
+            <li><a href="https://firebase.google.com/docs/web/setup" target="_blank">Documentación Firebase Web</a></li>
+            <li><a href="https://firebase.google.com/docs/auth" target="_blank">Firebase Authentication</a></li>
+            <li><a href="https://firebase.google.com/docs/firestore" target="_blank">Cloud Firestore</a></li>
+        </ul>
+
+        <h2>🔐 Seguridad en Producción</h2>
+        <div class="warning">
+            <p>Para un entorno de producción, considera:</p>
+            <ul>
+                <li>Crear una colección <code>admins</code> con roles</li>
+                <li>Actualizar reglas de Firestore para verificar roles</li>
+                <li>Implementar Cloud Functions para validaciones</li>
+                <li>Activar autenticación de dos factores</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

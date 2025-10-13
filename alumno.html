@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Alumno - Préstamo de Servidores</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">📡 Sistema de Préstamo</div>
+        <div class="nav-user">
+            <span id="userName">Usuario</span>
+            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="nueva">Nueva Solicitud</button>
+            <button class="tab-btn" data-tab="historial">Mis Solicitudes</button>
+        </div>
+
+        <!-- Nueva Solicitud -->
+        <div class="tab-content active" id="nuevaTab">
+            <div class="card">
+                <h2>Formulario de Solicitud</h2>
+                <form id="solicitudForm">
+                    <div class="form-section">
+                        <h3>Identificación del Responsable</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre del Responsable *</label>
+                                <input type="text" id="nombreResponsable" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Código del Responsable *</label>
+                                <input type="text" id="codigoResponsable" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Contexto Académico</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="docente">Docente Responsable (Supervisor) *</label>
+                                <input type="text" id="docente" placeholder="Nombre del profesor" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="curso">Curso *</label>
+                                <input type="text" id="curso" placeholder="Ej: Redes y Comunicaciones" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="semestre">Semestre *</label>
+                                <input type="text" id="semestre" placeholder="Ej: 2025-II" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Horario de Uso</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fecha">Fecha de Uso *</label>
+                                <input type="date" id="fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaEntrada">Hora de Entrada *</label>
+                                <input type="time" id="horaEntrada" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaSalida">Hora de Salida *</label>
+                                <input type="time" id="horaSalida" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Recursos Solicitados</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="servidor">Servidor *</label>
+                                <select id="servidor" required>
+                                    <option value="">Seleccione un servidor</option>
+                                    <option value="Server1">Server 1</option>
+                                    <option value="Server2">Server 2</option>
+                                    <option value="Server3">Server 3</option>
+                                    <option value="Server4">Server 4</option>
+                                    <option value="Server5">Server 5</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoServidor">Tipo de Servidor *</label>
+                                <input type="text" id="tipoServidor" placeholder="Ej: Dell PowerEdge" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="caracteristicas">Características Requeridas *</label>
+                            <textarea id="caracteristicas" rows="3" placeholder="Ej: 32GB RAM, procesador Intel Xeon..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Accesorios Requeridos</h3>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="accMonitor"> Monitor</label>
+                            <label><input type="checkbox" id="accTeclado"> Teclado</label>
+                            <label><input type="checkbox" id="accMouse"> Mouse</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Integrantes del Grupo</h3>
+                        <div id="integrantesContainer">
+                            <div class="integrante-item">
+                                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input">
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addIntegrante" class="btn btn-secondary">+ Agregar Integrante</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">Enviar Solicitud</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="tab-content" id="historialTab">
+            <div class="card">
+                <h2>Mis Solicitudes</h2>
+                <div id="solicitudesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
+            authDomain: "tareaweb2-59553.firebaseapp.com",
+            projectId: "tareaweb2-59553",
+            storageBucket: "tareaweb2-59553.firebasestorage.app",
+            messagingSenderId: "353313714839",
+            appId: "1:353313714839:web:685bfa9931e3096364efd2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let alumnoData = null;
+
+        // Auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const docSnap = await getDoc(doc(db, 'alumnos', user.uid));
+                if (docSnap.exists()) {
+                    alumnoData = docSnap.data();
+                    document.getElementById('userName').textContent = alumnoData.nombre;
+                    document.getElementById('nombreResponsable').value = alumnoData.nombre;
+                    document.getElementById('codigoResponsable').value = alumnoData.codigo;
+                    loadSolicitudes();
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        });
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Add integrante
+        document.getElementById('addIntegrante').addEventListener('click', () => {
+            const container = document.getElementById('integrantesContainer');
+            const div = document.createElement('div');
+            div.className = 'integrante-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(div);
+        });
+
+        // Submit solicitud
+        document.getElementById('solicitudForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const integrantes = Array.from(document.querySelectorAll('.integrante-input'))
+                .map(input => input.value.trim())
+                .filter(val => val !== '');
+
+            const accesorios = [];
+            if (document.getElementById('accMonitor').checked) accesorios.push('Monitor');
+            if (document.getElementById('accTeclado').checked) accesorios.push('Teclado');
+            if (document.getElementById('accMouse').checked) accesorios.push('Mouse');
+
+            const solicitud = {
+                // Identificación
+                nombreResponsable: document.getElementById('nombreResponsable').value,
+                codigoResponsable: document.getElementById('codigoResponsable').value,
+                uidAlumno: currentUser.uid,
+                emailAlumno: alumnoData.email,
+                
+                // Contexto
+                docente: document.getElementById('docente').value,
+                curso: document.getElementById('curso').value,
+                semestre: document.getElementById('semestre').value,
+                
+                // Horario
+                fecha: document.getElementById('fecha').value,
+                horaEntrada: document.getElementById('horaEntrada').value,
+                horaSalida: document.getElementById('horaSalida').value,
+                
+                // Recursos
+                servidor: document.getElementById('servidor').value,
+                tipoServidor: document.getElementById('tipoServidor').value,
+                caracteristicas: document.getElementById('caracteristicas').value,
+                
+                // Logística
+                accesorios: accesorios,
+                integrantes: integrantes,
+                
+                // Estado
+                estado: 'PENDIENTE',
+                fechaSolicitud: new Date().toISOString(),
+                respuestaAdmin: null
+            };
+
+            try {
+                await addDoc(collection(db, 'solicitudes'), solicitud);
+                alert('✅ Solicitud enviada con éxito');
+                document.getElementById('solicitudForm').reset();
+                document.getElementById('nombreResponsable').value = alumnoData.nombre;
+                document.getElementById('codigoResponsable').value = alumnoData.codigo;
+                loadSolicitudes();
+            } catch (error) {
+                alert('❌ Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        // Load solicitudes
+        async function loadSolicitudes() {
+            const q = query(
+                collection(db, 'solicitudes'),
+                where('uidAlumno', '==', currentUser.uid),
+                orderBy('fechaSolicitud', 'desc')
+            );
+
+            const querySnapshot = await getDocs(q);
+            const container = document.getElementById('solicitudesList');
+            
+            if (querySnapshot.empty) {
+                container.innerHTML = '<p class="empty-message">No tienes solicitudes registradas</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'solicitud-card';
+                
+                const statusClass = data.estado === 'ACEPTADO' ? 'status-aceptado' : 
+                                   data.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
+                
+                div.innerHTML = `
+                    <div class="solicitud-header">
+                        <div>
+                            <h3>${data.servidor} - ${data.curso}</h3>
+                            <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
+                        </div>
+                        <span class="status-badge ${statusClass}">${data.estado}</span>
+                    </div>
+                    <div class="solicitud-body">
+                        <p><strong>Docente:</strong> ${data.docente}</p>
+                        <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
+                        ${data.respuestaAdmin ? `
+                            <div class="admin-response">
+                                <strong>Respuesta del Administrador:</strong>
+                                <p>${data.respuestaAdmin}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>

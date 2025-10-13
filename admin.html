@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Préstamo de Servidores</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔐 Panel de Administración</div>
+        <div class="nav-user">
+            <span id="adminName">Administrador</span>
+            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <h2>Dashboard de Solicitudes</h2>
+            
+            <!-- Indicadores Numéricos -->
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <h3 id="totalSolicitudes">0</h3>
+                        <p>Total Solicitudes</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-pendiente">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="totalPendientes">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-aprobado">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3 id="totalAprobadas">0</h3>
+                        <p>Aprobadas</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-rechazado">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h3 id="totalRechazadas">0</h3>
+                        <p>Rechazadas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficas -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Distribución por Estado</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Demanda por Servidor</h3>
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Solicitudes -->
+        <div class="card">
+            <h2>Gestión de Solicitudes</h2>
+            
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="TODAS">Todas</button>
+                <button class="filter-btn" data-filter="PENDIENTE">Pendientes</button>
+                <button class="filter-btn" data-filter="ACEPTADO">Aprobadas</button>
+                <button class="filter-btn" data-filter="RECHAZADO">Rechazadas</button>
+            </div>
+
+            <div class="table-container">
+                <table id="solicitudesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Alumno</th>
+                            <th>Docente</th>
+                            <th>Curso</th>
+                            <th>Fecha</th>
+                            <th>Horario</th>
+                            <th>Servidor</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="solicitudesTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">Cargando solicitudes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles -->
+    <div id="detallesModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detalles de la Solicitud</h2>
+            <div id="detallesContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobar -->
+    <div id="aprobarModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Aprobar Solicitud</h2>
+            <form id="aprobarForm">
+                <div class="form-group">
+                    <label for="lugarAsignado">Lugar Asignado (Laboratorio/Sala) *</label>
+                    <input type="text" id="lugarAsignado" placeholder="Ej: Laboratorio 302" required>
+                </div>
+                <div class="form-group">
+                    <label for="notasAprobacion">Notas Adicionales</label>
+                    <textarea id="notasAprobacion" rows="3" placeholder="Instrucciones adicionales para el alumno..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Confirmar Aprobación</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Rechazar -->
+    <div id="rechazarModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Rechazar Solicitud</h2>
+            <form id="rechazarForm">
+                <div class="form-group">
+                    <label for="motivoRechazo">Motivo del Rechazo *</label>
+                    <textarea id="motivoRechazo" rows="4" placeholder="Explica por qué se rechaza esta solicitud..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">Confirmar Rechazo</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
+            authDomain: "tareaweb2-59553.firebaseapp.com",
+            projectId: "tareaweb2-59553",
+            storageBucket: "tareaweb2-59553.firebasestorage.app",
+            messagingSenderId: "353313714839",
+            appId: "1:353313714839:web:685bfa9931e3096364efd2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allSolicitudes = [];
+        let currentFilter = 'TODAS';
+        let selectedSolicitudId = null;
+        let pieChart = null;
+        let barChart = null;
+
+        // Auth check (en producción, deberías verificar si es admin)
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                loadSolicitudes();
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        });
+
+        // Load solicitudes
+        async function loadSolicitudes() {
+            const q = query(collection(db, 'solicitudes'), orderBy('fechaSolicitud', 'desc'));
+            const querySnapshot = await getDocs(q);
+            
+            allSolicitudes = [];
+            querySnapshot.forEach((doc) => {
+                allSolicitudes.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+
+            updateStats();
+            updateCharts();
+            renderTable();
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = allSolicitudes.length;
+            const pendientes = allSolicitudes.filter(s => s.estado === 'PENDIENTE').length;
+            const aprobadas = allSolicitudes.filter(s => s.estado === 'ACEPTADO').length;
+            const rechazadas = allSolicitudes.filter(s => s.estado === 'RECHAZADO').length;
+
+            document.getElementById('totalSolicitudes').textContent = total;
+            document.getElementById('totalPendientes').textContent = pendientes;
+            document.getElementById('totalAprobadas').textContent = aprobadas;
+            document.getElementById('totalRechazadas').textContent = rechazadas;
+        }
+
+        // Update charts
+        function updateCharts() {
+            const pendientes = allSolicitudes.filter(s => s.estado === 'PENDIENTE').length;
+            const aprobadas = allSolicitudes.filter(s => s.estado === 'ACEPTADO').length;
+            const rechazadas = allSolicitudes.filter(s => s.estado === 'RECHAZADO').length;
+
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Pendientes', 'Aprobadas', 'Rechazadas'],
+                    datasets: [{
+                        data: [pendientes, aprobadas, rechazadas],
+                        backgroundColor: ['#ffc107', '#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Bar Chart - Demanda por servidor
+            const servidores = {};
+            allSolicitudes.forEach(s => {
+                servidores[s.servidor] = (servidores[s.servidor] || 0) + 1;
+            });
+
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(servidores),
+                    datasets: [{
+                        label: 'Solicitudes',
+                        data: Object.values(servidores),
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderTable();
+            });
+        });
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('solicitudesTableBody');
+            const filtered = currentFilter === 'TODAS' ? 
+                allSolicitudes : 
+                allSolicitudes.filter(s => s.estado === currentFilter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-message">No hay solicitudes</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, index) => {
+                const statusClass = s.estado === 'ACEPTADO' ? 'status-aceptado' : 
+                                   s.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
+                
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${s.nombreResponsable}<br><small>${s.codigoResponsable}</small></td>
+                        <td>${s.docente}</td>
+                        <td>${s.curso}</td>
+                        <td>${s.fecha}</td>
+                        <td>${s.horaEntrada} - ${s.horaSalida}</td>
+                        <td>${s.servidor}</td>
+                        <td><span class="status-badge ${statusClass}">${s.estado}</span></td>
+                        <td class="action-btns">
+                            <button class="btn btn-info btn-sm" onclick="window.verDetalles('${s.id}')">👁️ Detalles</button>
+                            ${s.estado === 'PENDIENTE' ? `
+                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobar('${s.id}')">✅ Aprobar</button>
+                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazar('${s.id}')">❌ Rechazar</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Modals
+        const modals = ['detalles', 'aprobar', 'rechazar'];
+        modals.forEach(modalName => {
+            const modal = document.getElementById(`${modalName}Modal`);
+            const span = modal.querySelector('.close');
+            span.onclick = () => modal.style.display = 'none';
+        });
+
+        window.onclick = (event) => {
+            modals.forEach(modalName => {
+                const modal = document.getElementById(`${modalName}Modal`);
+                if (event.target == modal) modal.style.display = 'none';
+            });
+        };
+
+        // Ver detalles
+        window.verDetalles = (id) => {
+            const solicitud = allSolicitudes.find(s => s.id === id);
+            const content = document.getElementById('detallesContent');
+            
+            content.innerHTML = `
+                <div class="detalle-section">
+                    <h3>Responsable</h3>
+                    <p><strong>Nombre:</strong> ${solicitud.nombreResponsable}</p>
+                    <p><strong>Código:</strong> ${solicitud.codigoResponsable}</p>
+                    <p><strong>Email:</strong> ${solicitud.emailAlumno}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Contexto Académico</h3>
+                    <p><strong>Docente:</strong> ${solicitud.docente}</p>
+                    <p><strong>Curso:</strong> ${solicitud.curso}</p>
+                    <p><strong>Semestre:</strong> ${solicitud.semestre}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Horario</h3>
+                    <p><strong>Fecha:</strong> ${solicitud.fecha}</p>
+                    <p><strong>Entrada:</strong> ${solicitud.horaEntrada}</p>
+                    <p><strong>Salida:</strong> ${solicitud.horaSalida}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Recursos</h3>
+                    <p><strong>Servidor:</strong> ${solicitud.servidor}</p>
+                    <p><strong>Tipo:</strong> ${solicitud.tipoServidor}</p>
+                    <p><strong>Características:</strong> ${solicitud.caracteristicas}</p>
+                    <p><strong>Accesorios:</strong> ${solicitud.accesorios.join(', ') || 'Ninguno'}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Integrantes del Grupo</h3>
+                    <ul>
+                        ${solicitud.integrantes.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Estado</h3>
+                    <p><strong>Estado Actual:</strong> <span class="status-badge status-${solicitud.estado.toLowerCase()}">${solicitud.estado}</span></p>
+                    ${solicitud.respuestaAdmin ? `<p><strong>Respuesta:</strong> ${solicitud.respuestaAdmin}</p>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('detallesModal').style.display = 'block';
+        };
+
+        // Abrir modal aprobar
+        window.abrirAprobar = (id) => {
+            selectedSolicitudId = id;
+            document.getElementById('aprobarModal').style.display = 'block';
+        };
+
+        // Abrir modal rechazar
+        window.abrirRechazar = (id) => {
+            selectedSolicitudId = id;
+            document.getElementById('rechazarModal').style.display = 'block';
+        };
+
+        // Aprobar
+        document.getElementById('aprobarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lugar = document.getElementById('lugarAsignado').value;
+            const notas = document.getElementById('notasAprobacion').value;
+            
+            const respuesta = `Solicitud APROBADA. Lugar asignado: ${lugar}. ${notas ? 'Notas: ' + notas : ''}`;
+            
+            try {
+                await updateDoc(doc(db, 'solicitudes', selectedSolicitudId), {
+                    estado: 'ACEPTADO',
+                    respuestaAdmin: respuesta,
+                    fechaRespuesta: new Date().toISOString()
+                });
+                
+                alert('✅ Solicitud aprobada exitosamente');
+                document.getElementById('aprobarModal').style.display = 'none';
+                document.getElementById('aprobarForm').reset();
+                loadSolicitudes();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        });
+
+        // Rechazar
+        document.getElementById('rechazarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const motivo = document.getElementById('motivoRechazo').value;
+            
+            try {
+                await updateDoc(doc(db, 'solicitudes', selectedSolicitudId), {
+                    estado: 'RECHAZADO',
+                    respuestaAdmin: `Solicitud RECHAZADA. Motivo: ${motivo}`,
+                    fechaRespuesta: new Date().toISOString()
+                });
+                
+                alert('✅ Solicitud rechazada');
+                document.getElementById('rechazarModal').style.display = 'none';
+                document.getElementById('rechazarForm').reset();
+                loadSolicitudes();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
