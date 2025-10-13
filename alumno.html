@@ -83,28 +83,19 @@
                                 <label for="servidor">Servidor *</label>
                                 <select id="servidor" required>
                                     <option value="">Seleccione un servidor</option>
-                                    <option value="Server1">Server 1</option>
-                                    <option value="Server2">Server 2</option>
-                                    <option value="Server3">Server 3</option>
+                                    <option value="Server1">Server 1 - Dell PowerEdge</option>
+                                    <option value="Server2">Server 2 - HP ProLiant</option>
+                                    <option value="Server3">Server 3 - Lenovo ThinkSystem</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="tipoServidor">Tipo de Servidor *</label>
-                                <select id="tipoServidor" required>
-                                    <option value="">Seleccione el tipo</option>
-                                    <option value="Dell PowerEdge">Dell PowerEdge</option>
-                                    <option value="HP ProLiant">HP ProLiant</option>
-                                    <option value="Lenovo ThinkSystem">Lenovo ThinkSystem</option>
-                                    <option value="Supermicro">Supermicro</option>
-                                    <option value="Cisco UCS">Cisco UCS</option>
-                                    <option value="Otro">Otro (especificar)</option>
-                                </select>
-                                <input type="text" id="tipoServidorOtro" placeholder="Si seleccionó 'Otro', especifique aquí" style="display:none;margin-top:8px;" />
+                                <input type="text" id="tipoServidor" required readonly placeholder="Se asigna automáticamente">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="caracteristicas">Características Requeridas *</label>
-                            <textarea id="caracteristicas" rows="3" placeholder="Ej: 32GB RAM, procesador Intel Xeon..." required></textarea>
+                            <textarea id="caracteristicas" rows="8" placeholder="Ej: 32GB RAM, procesador Intel Xeon..." required></textarea>
                         </div>
                     </div>
 
@@ -263,39 +254,37 @@
             container.appendChild(div);
         });
 
-        // Toggle 'Otro' input for tipoServidor
-        const tipoSelect = document.getElementById('tipoServidor');
-        const tipoOtroInput = document.getElementById('tipoServidorOtro');
-        if (tipoSelect) {
-            tipoSelect.addEventListener('change', () => {
-                if (tipoSelect.value === 'Otro') {
-                    tipoOtroInput.style.display = 'block';
-                    tipoOtroInput.required = true;
-                } else {
-                    tipoOtroInput.style.display = 'none';
-                    tipoOtroInput.required = false;
-                    tipoOtroInput.value = '';
-                }
-            });
-        }
-
-        // Características de servidores predefinidas
-        const servidoresCaracteristicas = {
-            'Server1': 'Dell PowerEdge R740\n- Procesador: 2x Intel Xeon Gold 6230 (20 núcleos, 2.1GHz)\n- RAM: 128GB DDR4 ECC\n- Almacenamiento: 4x 2TB SAS HDD en RAID 10\n- Red: 4x 1Gbps Ethernet\n- GPU: NVIDIA Tesla T4 16GB\n- Sistema Operativo: Ubuntu Server 22.04 LTS',
-            'Server2': 'HP ProLiant DL380 Gen10\n- Procesador: 2x Intel Xeon Silver 4214 (12 núcleos, 2.2GHz)\n- RAM: 64GB DDR4 ECC\n- Almacenamiento: 2x 1TB SATA SSD + 4x 4TB SATA HDD\n- Red: 2x 10Gbps Ethernet\n- Controladora RAID: HPE Smart Array P408i-a\n- Sistema Operativo: Windows Server 2022',
-            'Server3': 'Lenovo ThinkSystem SR650\n- Procesador: 2x Intel Xeon Gold 5218 (16 núcleos, 2.3GHz)\n- RAM: 256GB DDR4 ECC\n- Almacenamiento: 6x 960GB NVMe SSD en RAID 5\n- Red: 4x 10Gbps Ethernet + 2x 25Gbps SFP28\n- GPU: 2x NVIDIA RTX A4000 16GB\n- Sistema Operativo: VMware ESXi 7.0'
+        // Mapeo de servidores con sus tipos y características enlazados
+        const servidoresData = {
+            'Server1': {
+                tipo: 'Dell PowerEdge',
+                caracteristicas: 'Dell PowerEdge R740\n- Procesador: 2x Intel Xeon Gold 6230 (20 núcleos, 2.1GHz)\n- RAM: 128GB DDR4 ECC\n- Almacenamiento: 4x 2TB SAS HDD en RAID 10\n- Red: 4x 1Gbps Ethernet\n- GPU: NVIDIA Tesla T4 16GB\n- Sistema Operativo: Ubuntu Server 22.04 LTS'
+            },
+            'Server2': {
+                tipo: 'HP ProLiant',
+                caracteristicas: 'HP ProLiant DL380 Gen10\n- Procesador: 2x Intel Xeon Silver 4214 (12 núcleos, 2.2GHz)\n- RAM: 64GB DDR4 ECC\n- Almacenamiento: 2x 1TB SATA SSD + 4x 4TB SATA HDD\n- Red: 2x 10Gbps Ethernet\n- Controladora RAID: HPE Smart Array P408i-a\n- Sistema Operativo: Windows Server 2022'
+            },
+            'Server3': {
+                tipo: 'Lenovo ThinkSystem',
+                caracteristicas: 'Lenovo ThinkSystem SR650\n- Procesador: 2x Intel Xeon Gold 5218 (16 núcleos, 2.3GHz)\n- RAM: 256GB DDR4 ECC\n- Almacenamiento: 6x 960GB NVMe SSD en RAID 5\n- Red: 4x 10Gbps Ethernet + 2x 25Gbps SFP28\n- GPU: 2x NVIDIA RTX A4000 16GB\n- Sistema Operativo: VMware ESXi 7.0'
+            }
         };
 
-        // Auto-cargar características al seleccionar servidor
+        // Auto-cargar tipo y características al seleccionar servidor
         const servidorSelect = document.getElementById('servidor');
+        const tipoServidorInput = document.getElementById('tipoServidor');
         const caracteristicasTextarea = document.getElementById('caracteristicas');
         
-        if (servidorSelect && caracteristicasTextarea) {
+        if (servidorSelect && tipoServidorInput && caracteristicasTextarea) {
             servidorSelect.addEventListener('change', () => {
                 const servidorSeleccionado = servidorSelect.value;
-                if (servidorSeleccionado && servidoresCaracteristicas[servidorSeleccionado]) {
-                    caracteristicasTextarea.value = servidoresCaracteristicas[servidorSeleccionado];
+                if (servidorSeleccionado && servidoresData[servidorSeleccionado]) {
+                    // Establecer el tipo automáticamente
+                    tipoServidorInput.value = servidoresData[servidorSeleccionado].tipo;
+                    // Establecer las características automáticamente
+                    caracteristicasTextarea.value = servidoresData[servidorSeleccionado].caracteristicas;
                 } else {
+                    tipoServidorInput.value = '';
                     caracteristicasTextarea.value = '';
                 }
             });
@@ -352,11 +341,6 @@
                 if (document.getElementById('accTeclado').checked) accesorios.push('Teclado');
                 if (document.getElementById('accMouse').checked) accesorios.push('Mouse');
 
-                // determine tipoServidor value (use 'otro' if provided)
-                const tipoServidorValue = (document.getElementById('tipoServidor').value === 'Otro')
-                    ? document.getElementById('tipoServidorOtro').value
-                    : document.getElementById('tipoServidor').value;
-
                 const solicitud = {
                     // Identificación
                     nombreResponsable: document.getElementById('nombreResponsable').value,
@@ -376,7 +360,7 @@
                     
                     // Recursos
                     servidor: document.getElementById('servidor').value,
-                    tipoServidor: tipoServidorValue,
+                    tipoServidor: document.getElementById('tipoServidor').value,
                     caracteristicas: document.getElementById('caracteristicas').value,
                     
                     // Logística
