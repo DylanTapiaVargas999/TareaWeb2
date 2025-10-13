@@ -56,8 +56,20 @@
             <!-- Gráficas -->
             <div class="charts-grid">
                 <div class="chart-card">
-                    <h3>Distribución por Estado</h3>
-                    <canvas id="pieChart"></canvas>
+                    <h3>📅 Calendario de Ocupación de Servidores</h3>
+                    <div id="calendarContainer" class="calendar-container">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="btn btn-sm btn-secondary">◀</button>
+                            <h4 id="currentMonth"></h4>
+                            <button id="nextMonth" class="btn btn-sm btn-secondary">▶</button>
+                        </div>
+                        <div class="calendar-legend">
+                            <span><span class="legend-dot available"></span> Disponible</span>
+                            <span><span class="legend-dot occupied"></span> Ocupado</span>
+                            <span><span class="legend-dot multiple"></span> Múltiples</span>
+                        </div>
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                    </div>
                 </div>
                 <div class="chart-card">
                     <h3>Demanda por Servidor</h3>
@@ -166,8 +178,8 @@
         let allSolicitudes = [];
         let currentFilter = 'TODAS';
         let selectedSolicitudId = null;
-        let pieChart = null;
         let barChart = null;
+        let currentCalendarDate = new Date();
 
         // Auth check - Verificar que es administrador
         onAuthStateChanged(auth, async (user) => {
@@ -243,31 +255,12 @@
             document.getElementById('totalRechazadas').textContent = rechazadas;
         }
 
-        // Update charts
+        // Update charts and calendar
         function updateCharts() {
-            const pendientes = allSolicitudes.filter(s => s.estado === 'PENDIENTE').length;
-            const aprobadas = allSolicitudes.filter(s => s.estado === 'ACEPTADO').length;
-            const rechazadas = allSolicitudes.filter(s => s.estado === 'RECHAZADO').length;
+            // Renderizar calendario
+            renderCalendar();
 
-            // Pie Chart
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Pendientes', 'Aprobadas', 'Rechazadas'],
-                    datasets: [{
-                        data: [pendientes, aprobadas, rechazadas],
-                        backgroundColor: ['#ffc107', '#28a745', '#dc3545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true
-                }
-            });
-
-            // Bar Chart - Demanda por servidor
+            // Bar Chart - Demanda por servidor (todas las solicitudes)
             const servidores = {};
             allSolicitudes.forEach(s => {
                 servidores[s.servidor] = (servidores[s.servidor] || 0) + 1;
@@ -299,6 +292,118 @@
                 }
             });
         }
+
+        // Renderizar calendario
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Actualizar título
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+
+            // Obtener primer día del mes y total de días
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Crear grid del calendario
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // Días de la semana
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+
+            // Espacios vacíos antes del primer día
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                grid.appendChild(emptyDay);
+            }
+
+            // Días del mes
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Buscar solicitudes aceptadas para esta fecha
+                const solicitudesDelDia = allSolicitudes.filter(s => 
+                    s.estado === 'ACEPTADO' && s.fecha === dateStr
+                );
+
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                // Marcar día actual
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayCell.classList.add('today');
+                }
+
+                // Colorear según ocupación
+                if (solicitudesDelDia.length > 0) {
+                    if (solicitudesDelDia.length === 1) {
+                        dayCell.classList.add('occupied');
+                    } else {
+                        dayCell.classList.add('multiple');
+                    }
+                    
+                    // Tooltip con información
+                    const servidoresInfo = solicitudesDelDia.map(s => 
+                        `${s.servidor} (${s.horaEntrada}-${s.horaSalida})`
+                    ).join('\n');
+                    dayCell.title = `${solicitudesDelDia.length} servidor(es) ocupado(s):\n${servidoresInfo}`;
+                    
+                    // Click para mostrar detalles
+                    dayCell.style.cursor = 'pointer';
+                    dayCell.addEventListener('click', () => {
+                        mostrarDetallesDia(dateStr, solicitudesDelDia);
+                    });
+                }
+
+                dayCell.innerHTML = `<span class="day-number">${day}</span>`;
+                if (solicitudesDelDia.length > 0) {
+                    dayCell.innerHTML += `<span class="day-count">${solicitudesDelDia.length}</span>`;
+                }
+
+                grid.appendChild(dayCell);
+            }
+        }
+
+        // Mostrar detalles de un día específico
+        function mostrarDetallesDia(fecha, solicitudes) {
+            const content = document.getElementById('detallesContent');
+            content.innerHTML = `
+                <h3>Solicitudes para ${fecha}</h3>
+                ${solicitudes.map(s => `
+                    <div class="detalle-section" style="border-left: 4px solid #28a745; padding-left: 1rem; margin-bottom: 1rem;">
+                        <p><strong>Servidor:</strong> ${s.servidor}</p>
+                        <p><strong>Horario:</strong> ${s.horaEntrada} - ${s.horaSalida}</p>
+                        <p><strong>Responsable:</strong> ${s.nombreResponsable} (${s.codigoResponsable})</p>
+                        <p><strong>Curso:</strong> ${s.curso}</p>
+                        <p><strong>Docente:</strong> ${s.docente}</p>
+                        <button class="btn btn-info btn-sm" onclick="window.verDetalles('${s.id}')">Ver más detalles</button>
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('detallesModal').style.display = 'block';
+        }
+
+        // Navegación del calendario
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        });
 
         // Filter buttons
         document.querySelectorAll('.filter-btn').forEach(btn => {
