@@ -53,7 +53,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="semestre">Semestre *</label>
-                                <input type="text" id="semestre" placeholder="Ej: 2025-II" required value="2025-II">
+                                <input type="text" id="semestre" placeholder="Ej: 2025-II" required value="2025-II" readonly>
                             </div>
                         </div>
                     </div>
@@ -163,6 +163,59 @@
         let currentUser = null;
         let alumnoData = null;
 
+        // Función para establecer fecha y hora mínima
+        function setMinDateTime() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const fechaInput = document.getElementById('fecha');
+            const horaEntradaInput = document.getElementById('horaEntrada');
+            const horaSalidaInput = document.getElementById('horaSalida');
+            
+            // Establecer fecha mínima como hoy
+            fechaInput.min = today;
+            
+            // Función para actualizar hora mínima según la fecha seleccionada
+            function updateMinTime() {
+                const selectedDate = fechaInput.value;
+                if (selectedDate === today) {
+                    // Si es hoy, establecer hora mínima como la hora actual
+                    const currentHour = String(now.getHours()).padStart(2, '0');
+                    const currentMinute = String(now.getMinutes()).padStart(2, '0');
+                    const minTime = `${currentHour}:${currentMinute}`;
+                    horaEntradaInput.min = minTime;
+                    
+                    // Validar si la hora ya ingresada es anterior a la actual
+                    if (horaEntradaInput.value && horaEntradaInput.value < minTime) {
+                        horaEntradaInput.value = '';
+                    }
+                } else {
+                    // Si es una fecha futura, permitir cualquier hora
+                    horaEntradaInput.removeAttribute('min');
+                }
+            }
+            
+            // Validar que hora de salida sea posterior a hora de entrada
+            function validateHoraSalida() {
+                if (horaEntradaInput.value && horaSalidaInput.value) {
+                    if (horaSalidaInput.value <= horaEntradaInput.value) {
+                        alert('⚠️ La hora de salida debe ser posterior a la hora de entrada');
+                        horaSalidaInput.value = '';
+                    }
+                }
+            }
+            
+            // Listeners para validación en tiempo real
+            fechaInput.addEventListener('change', updateMinTime);
+            horaEntradaInput.addEventListener('change', () => {
+                updateMinTime();
+                validateHoraSalida();
+            });
+            horaSalidaInput.addEventListener('change', validateHoraSalida);
+            
+            // Inicializar
+            updateMinTime();
+        }
+
         // Auth state
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -174,6 +227,8 @@
                     document.getElementById('nombreResponsable').value = alumnoData.nombre;
                     document.getElementById('codigoResponsable').value = alumnoData.codigo;
                     loadSolicitudes();
+                    // Establecer validaciones de fecha y hora
+                    setMinDateTime();
                 }
             } else {
                 window.location.href = 'index.html';
@@ -224,9 +279,62 @@
             });
         }
 
+        // Características de servidores predefinidas
+        const servidoresCaracteristicas = {
+            'Server1': 'Dell PowerEdge R740\n- Procesador: 2x Intel Xeon Gold 6230 (20 núcleos, 2.1GHz)\n- RAM: 128GB DDR4 ECC\n- Almacenamiento: 4x 2TB SAS HDD en RAID 10\n- Red: 4x 1Gbps Ethernet\n- GPU: NVIDIA Tesla T4 16GB\n- Sistema Operativo: Ubuntu Server 22.04 LTS',
+            'Server2': 'HP ProLiant DL380 Gen10\n- Procesador: 2x Intel Xeon Silver 4214 (12 núcleos, 2.2GHz)\n- RAM: 64GB DDR4 ECC\n- Almacenamiento: 2x 1TB SATA SSD + 4x 4TB SATA HDD\n- Red: 2x 10Gbps Ethernet\n- Controladora RAID: HPE Smart Array P408i-a\n- Sistema Operativo: Windows Server 2022',
+            'Server3': 'Lenovo ThinkSystem SR650\n- Procesador: 2x Intel Xeon Gold 5218 (16 núcleos, 2.3GHz)\n- RAM: 256GB DDR4 ECC\n- Almacenamiento: 6x 960GB NVMe SSD en RAID 5\n- Red: 4x 10Gbps Ethernet + 2x 25Gbps SFP28\n- GPU: 2x NVIDIA RTX A4000 16GB\n- Sistema Operativo: VMware ESXi 7.0'
+        };
+
+        // Auto-cargar características al seleccionar servidor
+        const servidorSelect = document.getElementById('servidor');
+        const caracteristicasTextarea = document.getElementById('caracteristicas');
+        
+        if (servidorSelect && caracteristicasTextarea) {
+            servidorSelect.addEventListener('change', () => {
+                const servidorSeleccionado = servidorSelect.value;
+                if (servidorSeleccionado && servidoresCaracteristicas[servidorSeleccionado]) {
+                    caracteristicasTextarea.value = servidoresCaracteristicas[servidorSeleccionado];
+                } else {
+                    caracteristicasTextarea.value = '';
+                }
+            });
+        }
+
         // Submit solicitud
         document.getElementById('solicitudForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Validar fecha y hora antes de enviar
+            const fechaSeleccionada = document.getElementById('fecha').value;
+            const horaEntrada = document.getElementById('horaEntrada').value;
+            const horaSalida = document.getElementById('horaSalida').value;
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            
+            // Validar que la fecha no sea en el pasado
+            if (fechaSeleccionada < today) {
+                alert('❌ No se pueden solicitar fechas anteriores a hoy');
+                return;
+            }
+            
+            // Validar que si es hoy, la hora no sea en el pasado
+            if (fechaSeleccionada === today) {
+                const currentHour = String(now.getHours()).padStart(2, '0');
+                const currentMinute = String(now.getMinutes()).padStart(2, '0');
+                const minTime = `${currentHour}:${currentMinute}`;
+                
+                if (horaEntrada < minTime) {
+                    alert('❌ No se pueden solicitar horas en el pasado');
+                    return;
+                }
+            }
+            
+            // Validar que hora de salida sea posterior a hora de entrada
+            if (horaSalida <= horaEntrada) {
+                alert('❌ La hora de salida debe ser posterior a la hora de entrada');
+                return;
+            }
 
             // Deshabilitar el botón para evitar envíos duplicados
             const submitBtn = e.target.querySelector('button[type="submit"]');
