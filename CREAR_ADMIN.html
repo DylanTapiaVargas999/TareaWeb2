@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta de Administrador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #f0f8ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status p {
+            margin: 5px 0;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Crear Cuenta de Administrador</h1>
+        
+        <div class="info-box">
+            <h3>📋 Credenciales del Administrador:</h3>
+            <p><strong>Email:</strong> admin@gmail.com</p>
+            <p><strong>Contraseña:</strong> 12345</p>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ Importante:</h3>
+            <p>Esta página solo debe usarse UNA VEZ para crear la cuenta del administrador.</p>
+            <p>Si la cuenta ya existe, verás un error de "email-already-in-use".</p>
+        </div>
+
+        <button id="createAdminBtn" onclick="createAdminAccount()">
+            Crear Cuenta de Administrador
+        </button>
+
+        <button onclick="checkIfExists()" style="background: #28a745;">
+            Verificar si ya existe
+        </button>
+
+        <div class="status" id="status">
+            <p class="info">Presiona el botón para crear la cuenta de administrador...</p>
+        </div>
+
+        <div class="success-box" id="successBox">
+            <h3>✅ ¡Cuenta creada exitosamente!</h3>
+            <p>Ahora puedes iniciar sesión en el sistema con:</p>
+            <p><strong>Email:</strong> admin@gmail.com</p>
+            <p><strong>Contraseña:</strong> 12345</p>
+        </div>
+
+        <div class="link">
+            <a href="index.html">← Volver al Login</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
+            authDomain: "tareaweb2-59553.firebaseapp.com",
+            projectId: "tareaweb2-59553",
+            storageBucket: "tareaweb2-59553.firebasestorage.app",
+            messagingSenderId: "353313714839",
+            appId: "1:353313714839:web:685bfa9931e3096364efd2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const statusDiv = document.getElementById('status');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            statusDiv.innerHTML += `<p class="${className}">[${timestamp}] ${message}</p>`;
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            statusDiv.innerHTML = '';
+        }
+
+        window.createAdminAccount = async function() {
+            clearLog();
+            const btn = document.getElementById('createAdminBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creando cuenta...';
+
+            try {
+                log('🔐 Iniciando creación de cuenta de administrador...', 'info');
+                log('Email: admin@gmail.com', 'info');
+                
+                // Paso 1: Crear usuario en Firebase Auth
+                log('Paso 1: Creando usuario en Firebase Authentication...', 'info');
+                const userCredential = await createUserWithEmailAndPassword(auth, 'admin@gmail.com', '12345');
+                const user = userCredential.user;
+                log('✅ Usuario creado exitosamente en Authentication', 'success');
+                log('UID: ' + user.uid, 'info');
+
+                // Paso 2: Guardar datos de admin en Firestore
+                log('Paso 2: Guardando datos en Firestore...', 'info');
+                const adminData = {
+                    email: 'admin@gmail.com',
+                    rol: 'admin',
+                    nombre: 'Administrador del Sistema',
+                    fechaCreacion: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
+                await setDoc(doc(db, 'administradores', user.uid), adminData);
+                log('✅ Datos guardados en colección "administradores"', 'success');
+
+                // Verificar
+                const savedDoc = await getDoc(doc(db, 'administradores', user.uid));
+                if (savedDoc.exists()) {
+                    log('✅ Verificación: Documento existe en Firestore', 'success');
+                    log('Datos: ' + JSON.stringify(savedDoc.data(), null, 2), 'info');
+                }
+
+                log('════════════════════════════════════════', 'success');
+                log('✅✅✅ CUENTA DE ADMIN CREADA EXITOSAMENTE ✅✅✅', 'success');
+                log('════════════════════════════════════════', 'success');
+
+                document.getElementById('successBox').style.display = 'block';
+                btn.textContent = '✅ Cuenta Creada';
+
+                // Cerrar sesión para que pueda hacer login
+                setTimeout(async () => {
+                    await signOut(auth);
+                    log('Sesión cerrada. Ahora puedes iniciar sesión.', 'info');
+                }, 2000);
+
+            } catch (error) {
+                log('❌ ERROR: ' + error.code, 'error');
+                log('Mensaje: ' + error.message, 'error');
+
+                if (error.code === 'auth/email-already-in-use') {
+                    log('ℹ️ La cuenta de administrador YA EXISTE', 'info');
+                    log('Puedes iniciar sesión directamente con:', 'info');
+                    log('  Email: admin@gmail.com', 'info');
+                    log('  Contraseña: 12345', 'info');
+                    btn.textContent = 'La cuenta ya existe';
+                } else {
+                    btn.textContent = 'Error al crear cuenta';
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        window.checkIfExists = async function() {
+            clearLog();
+            log('🔍 Verificando si la cuenta de admin existe...', 'info');
+
+            try {
+                // Intentar iniciar sesión
+                const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', '12345');
+                const user = userCredential.user;
+                
+                log('✅ La cuenta de administrador EXISTE', 'success');
+                log('UID: ' + user.uid, 'info');
+                log('Email: ' + user.email, 'info');
+
+                // Verificar en Firestore
+                const docSnap = await getDoc(doc(db, 'administradores', user.uid));
+                if (docSnap.exists()) {
+                    log('✅ Datos encontrados en Firestore:', 'success');
+                    log(JSON.stringify(docSnap.data(), null, 2), 'info');
+                } else {
+                    log('⚠️ Usuario existe en Auth pero NO en Firestore', 'error');
+                }
+
+                // Cerrar sesión
+                await signOut(auth);
+                log('Sesión cerrada.', 'info');
+
+            } catch (error) {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    log('❌ La cuenta de administrador NO EXISTE', 'error');
+                    log('Presiona el botón "Crear Cuenta de Administrador" para crearla.', 'info');
+                } else {
+                    log('❌ Error: ' + error.message, 'error');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

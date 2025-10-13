@@ -1,0 +1,173 @@
+═══════════════════════════════════════════════════════════════
+SCRIPT DE PRUEBA - VERIFICAR FIRESTORE
+═══════════════════════════════════════════════════════════════
+
+Copia y pega estos scripts en la CONSOLA DEL NAVEGADOR (F12 → Console)
+para diagnosticar problemas con Firestore.
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 1: VERIFICAR CONEXIÓN A FIREBASE
+═══════════════════════════════════════════════════════════════
+
+// Pega este código en la consola:
+console.log('Firebase App:', firebase.app().name);
+console.log('Firebase Config:', firebase.app().options);
+
+RESULTADO ESPERADO:
+Firebase App: [DEFAULT]
+Firebase Config: {apiKey: "...", authDomain: "...", ...}
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 2: VERIFICAR USUARIO AUTENTICADO
+═══════════════════════════════════════════════════════════════
+
+// Pega este código en la consola:
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    console.log('✅ Usuario autenticado:');
+    console.log('  UID:', user.uid);
+    console.log('  Email:', user.email);
+    console.log('  Email verificado:', user.emailVerified);
+  } else {
+    console.log('❌ No hay usuario autenticado');
+  }
+});
+
+RESULTADO ESPERADO (si ya iniciaste sesión):
+✅ Usuario autenticado:
+  UID: [algún ID aleatorio]
+  Email: [tu correo]
+  Email verificado: false
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 3: PROBAR LECTURA DE FIRESTORE
+═══════════════════════════════════════════════════════════════
+
+// Pega este código en la consola:
+firebase.firestore().collection('alumnos').get()
+  .then(snapshot => {
+    console.log('✅ Lectura exitosa');
+    console.log('Total de documentos en "alumnos":', snapshot.size);
+    snapshot.forEach(doc => {
+      console.log('Documento:', doc.id, '→', doc.data());
+    });
+  })
+  .catch(error => {
+    console.error('❌ Error al leer:', error.code, error.message);
+  });
+
+RESULTADO ESPERADO (si todo está bien):
+✅ Lectura exitosa
+Total de documentos en "alumnos": 1 (o más)
+Documento: [UID] → {codigo: "...", nombre: "...", ...}
+
+RESULTADO DE ERROR (si las reglas están mal):
+❌ Error al leer: permission-denied Missing or insufficient permissions
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 4: PROBAR ESCRITURA EN FIRESTORE (MANUAL)
+═══════════════════════════════════════════════════════════════
+
+// Pega este código en la consola (después de iniciar sesión):
+const user = firebase.auth().currentUser;
+if (user) {
+  firebase.firestore().collection('alumnos').doc(user.uid).set({
+    codigo: 'TEST123',
+    nombre: 'Usuario de Prueba',
+    email: user.email,
+    rol: 'alumno',
+    fechaRegistro: new Date().toISOString(),
+    timestamp: Date.now()
+  })
+  .then(() => {
+    console.log('✅ Escritura exitosa en Firestore');
+  })
+  .catch(error => {
+    console.error('❌ Error al escribir:', error.code, error.message);
+  });
+} else {
+  console.error('❌ No hay usuario autenticado');
+}
+
+RESULTADO ESPERADO:
+✅ Escritura exitosa en Firestore
+
+RESULTADO DE ERROR:
+❌ Error al escribir: permission-denied ...
+   → Necesitas configurar las reglas de Firestore
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 5: PROBAR LECTURA DE SOLICITUDES
+═══════════════════════════════════════════════════════════════
+
+// Pega este código en la consola:
+firebase.firestore().collection('solicitudes').get()
+  .then(snapshot => {
+    console.log('✅ Lectura exitosa de solicitudes');
+    console.log('Total de solicitudes:', snapshot.size);
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      console.log('Solicitud:', doc.id);
+      console.log('  Estado:', data.estado);
+      console.log('  Servidor:', data.servidor);
+      console.log('  Fecha:', data.fecha);
+    });
+  })
+  .catch(error => {
+    console.error('❌ Error:', error.code, error.message);
+  });
+
+═══════════════════════════════════════════════════════════════
+PRUEBA 6: VERIFICAR ESTRUCTURA DE DATOS AL REGISTRAR
+═══════════════════════════════════════════════════════════════
+
+Después de intentar registrar un usuario, busca en la consola:
+
+✅ Busca estos mensajes:
+   📝 Iniciando registro de usuario...
+   Código: [tu código]
+   Nombre: [tu nombre]
+   Email: [tu email]
+   Paso 1: Creando usuario en Firebase Auth...
+   ✅ Usuario creado en Auth. UID: [UID]
+   Paso 2: Guardando datos en Firestore...
+   Datos a guardar: {codigo: "...", nombre: "...", ...}
+   ✅ Datos guardados en Firestore exitosamente
+
+❌ Si ves este error:
+   Error detallado: FirebaseError: Missing or insufficient permissions
+   → Las reglas de Firestore NO permiten la escritura
+   → Sigue las instrucciones en SOLUCION_REGISTRO.txt
+
+═══════════════════════════════════════════════════════════════
+INTERPRETACIÓN DE ERRORES COMUNES:
+═══════════════════════════════════════════════════════════════
+
+ERROR: "permission-denied"
+CAUSA: Las reglas de Firestore bloquean la operación
+SOLUCIÓN: Configura las reglas en Firebase Console
+
+ERROR: "unauthenticated"
+CAUSA: No hay usuario autenticado
+SOLUCIÓN: Inicia sesión primero
+
+ERROR: "not-found"
+CAUSA: La colección o documento no existe
+SOLUCIÓN: Normal si es la primera vez, se creará automáticamente
+
+ERROR: "network-request-failed"
+CAUSA: No hay conexión a Internet
+SOLUCIÓN: Verifica tu conexión
+
+═══════════════════════════════════════════════════════════════
+CÓMO USAR ESTOS SCRIPTS:
+═══════════════════════════════════════════════════════════════
+
+1. Abre tu aplicación web en el navegador
+2. Presiona F12 para abrir Developer Tools
+3. Ve a la pestaña "Console"
+4. Copia y pega cada script uno por uno
+5. Presiona Enter para ejecutar
+6. Lee los resultados
+
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,113 @@
+═══════════════════════════════════════════════════════════════
+INSTRUCCIONES: CONFIGURAR REGLAS DE FIRESTORE
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA DETECTADO:
+- El error al enviar solicitudes probablemente se debe a reglas de 
+  seguridad restrictivas en Firestore.
+
+═══════════════════════════════════════════════════════════════
+SOLUCIÓN: CONFIGURAR REGLAS EN FIREBASE CONSOLE
+═══════════════════════════════════════════════════════════════
+
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto: "tareaweb2-59553"
+3. En el menú lateral, ve a "Firestore Database"
+4. Click en la pestaña "Reglas" (Rules)
+5. Reemplaza las reglas actuales con estas:
+
+───────────────────────────────────────────────────────────────
+REGLAS PARA DESARROLLO (PERMISIVAS):
+───────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Colección de alumnos
+    match /alumnos/{alumnoId} {
+      // Permitir creación durante el registro (cuando el UID coincide)
+      allow create: if request.auth != null 
+                    && request.auth.uid == alumnoId;
+      
+      // Permitir lectura de su propio documento
+      allow read: if request.auth != null 
+                  && request.auth.uid == alumnoId;
+      
+      // Permitir actualización de su propio documento
+      allow update: if request.auth != null 
+                    && request.auth.uid == alumnoId;
+      
+      // No permitir eliminación (o solo a admins)
+      allow delete: if false;
+    }
+    
+    // Colección de solicitudes
+    match /solicitudes/{solicitudId} {
+      // Permitir lectura a usuarios autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir creación a usuarios autenticados
+      allow create: if request.auth != null 
+                    && request.resource.data.uidAlumno == request.auth.uid;
+      
+      // Permitir actualización solo si eres el dueño o admin
+      allow update: if request.auth != null;
+      
+      // Permitir eliminación solo a admins
+      allow delete: if request.auth != null;
+    }
+  }
+}
+
+───────────────────────────────────────────────────────────────
+REGLAS MÁS SIMPLES (SOLO PARA PRUEBAS):
+───────────────────────────────────────────────────────────────
+
+Si sigues teniendo problemas, puedes usar estas reglas más permisivas
+SOLO PARA PRUEBAS (no para producción):
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+───────────────────────────────────────────────────────────────
+DESPUÉS DE CAMBIAR LAS REGLAS:
+───────────────────────────────────────────────────────────────
+
+1. Click en "Publicar" (Publish)
+2. Espera unos segundos a que se apliquen los cambios
+3. Recarga tu aplicación web
+4. Intenta registrar y enviar una solicitud nuevamente
+
+═══════════════════════════════════════════════════════════════
+VERIFICAR SI FUNCIONÓ:
+═══════════════════════════════════════════════════════════════
+
+1. Abre tu aplicación web
+2. Abre la Consola del Navegador (F12)
+3. Ve a la pestaña "Console"
+4. Intenta enviar una solicitud
+5. Deberías ver mensajes como:
+   - "Enviando solicitud: {...}"
+   - "Solicitud guardada con ID: abc123"
+
+Si ves errores tipo "permission-denied" o "Missing or insufficient permissions",
+las reglas aún no están configuradas correctamente.
+
+═══════════════════════════════════════════════════════════════
+CAMBIOS REALIZADOS EN EL CÓDIGO:
+═══════════════════════════════════════════════════════════════
+
+✅ Removido orderBy() que requería índices compuestos
+✅ Agregado ordenamiento en el cliente (JavaScript)
+✅ Agregado manejo de errores mejorado con console.log
+✅ Agregado timestamp adicional para mejor ordenamiento
+✅ Deshabilitación del botón de envío para evitar duplicados
+✅ Cambio automático a pestaña de historial después de enviar
+
+═══════════════════════════════════════════════════════════════

@@ -60,10 +60,7 @@
                 </form>
             </div>
 
-            <!-- Admin Access -->
-            <div class="admin-access">
-                <a href="admin.html" class="admin-link">🔐 Acceso Administrador</a>
-            </div>
+            <!-- Nota: Admin usa el mismo formulario de login -->
         </div>
     </div>
 
@@ -87,9 +84,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Flag para evitar redirección durante el registro
+        let isRegistering = false;
+
         // Check if already logged in
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && !isRegistering) {
+                console.log('Usuario ya autenticado, redirigiendo a alumno.html');
                 window.location.href = 'alumno.html';
             }
         });
@@ -110,16 +111,33 @@
         // Login
         document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
             try {
-                // If email doesn't contain @, assume it's a codigo and append domain
-                const loginEmail = email.includes('@') ? email : `${email}@alumno.local`;
-                await signInWithEmailAndPassword(auth, loginEmail, password);
-                alert('✅ Inicio de sesión exitoso');
-                window.location.href = 'alumno.html';
+                console.log('Iniciando sesión con:', email);
+                
+                // Verificar si es el admin
+                const isAdmin = email === 'admin@gmail.com' && password === '12345';
+                
+                if (isAdmin) {
+                    console.log('Detectado login de administrador');
+                    // Login como admin
+                    await signInWithEmailAndPassword(auth, email, password);
+                    console.log('✅ Admin autenticado exitosamente');
+                    alert('✅ Bienvenido Administrador');
+                    window.location.href = 'admin.html';
+                } else {
+                    console.log('Detectado login de alumno');
+                    // If email doesn't contain @, assume it's a codigo and append domain
+                    const loginEmail = email.includes('@') ? email : `${email}@alumno.local`;
+                    await signInWithEmailAndPassword(auth, loginEmail, password);
+                    console.log('✅ Alumno autenticado exitosamente');
+                    alert('✅ Inicio de sesión exitoso');
+                    window.location.href = 'alumno.html';
+                }
             } catch (error) {
+                console.error('❌ Error en login:', error);
                 alert('❌ Error: ' + error.message);
             }
         });
@@ -127,40 +145,116 @@
         // Register
         document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const codigo = document.getElementById('registerCodigo').value;
-            const nombre = document.getElementById('registerNombre').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-
-            if (password !== passwordConfirm) {
-                alert('❌ Las contraseñas no coinciden');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('❌ La contraseña debe tener al menos 6 caracteres');
-                return;
-            }
+            
+            // Activar flag para prevenir redirección automática
+            isRegistering = true;
+            
+            // Deshabilitar botón para evitar envíos duplicados
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registrando...';
 
             try {
-                // Create user
+                const codigo = document.getElementById('registerCodigo').value.trim();
+                const nombre = document.getElementById('registerNombre').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const password = document.getElementById('registerPassword').value;
+                const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+                // Validaciones
+                if (password !== passwordConfirm) {
+                    alert('❌ Las contraseñas no coinciden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
+
+                if (password.length < 6) {
+                    alert('❌ La contraseña debe tener al menos 6 caracteres');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
+
+                console.log('📝 Iniciando registro de usuario...');
+                console.log('Código:', codigo);
+                console.log('Nombre:', nombre);
+                console.log('Email:', email);
+
+                // Paso 1: Crear usuario en Firebase Auth
+                console.log('Paso 1: Creando usuario en Firebase Auth...');
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                console.log('✅ Usuario creado en Auth. UID:', user.uid);
 
-                // Save additional data to Firestore
-                await setDoc(doc(db, 'alumnos', user.uid), {
+                // Paso 2: Guardar datos adicionales en Firestore
+                console.log('Paso 2: Guardando datos en Firestore colección "alumnos"...');
+                const alumnoData = {
                     codigo: codigo,
                     nombre: nombre,
                     email: email,
                     rol: 'alumno',
-                    fechaRegistro: new Date().toISOString()
-                });
+                    fechaRegistro: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+                
+                console.log('Datos a guardar:', alumnoData);
+                
+                // Intentar guardar en Firestore con retry
+                try {
+                    const docRef = doc(db, 'alumnos', user.uid);
+                    console.log('Referencia del documento:', docRef.path);
+                    await setDoc(docRef, alumnoData);
+                    console.log('✅ Datos guardados en Firestore exitosamente');
+                    
+                    // Verificar que se guardó correctamente
+                    const savedDoc = await getDoc(docRef);
+                    if (savedDoc.exists()) {
+                        console.log('✅ Verificación: Documento existe en Firestore:', savedDoc.data());
+                    } else {
+                        console.warn('⚠️ Advertencia: Documento no encontrado después de guardar');
+                    }
+                } catch (firestoreError) {
+                    console.error('❌ Error específico de Firestore:', firestoreError);
+                    throw firestoreError;
+                }
 
+                console.log('✅ Proceso de registro completado exitosamente');
                 alert('✅ Registro exitoso. Bienvenido!');
+                
+                // Desactivar flag y redirigir
+                isRegistering = false;
                 window.location.href = 'alumno.html';
+                
             } catch (error) {
-                alert('❌ Error: ' + error.message);
+                // Desactivar flag en caso de error
+                isRegistering = false;
+                
+                console.error('❌ Error detallado:', error);
+                console.error('Código de error:', error.code);
+                console.error('Mensaje:', error.message);
+                
+                let errorMsg = 'Error al registrar: ';
+                
+                // Mensajes de error más específicos
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg += 'Este correo ya está registrado';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg += 'Correo electrónico inválido';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg += 'Contraseña muy débil';
+                } else if (error.code === 'permission-denied') {
+                    errorMsg += 'Sin permisos para guardar datos. Revisa las reglas de Firestore';
+                } else {
+                    errorMsg += error.message;
+                }
+                
+                alert('❌ ' + errorMsg);
+                
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
     </script>

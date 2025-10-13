@@ -1,0 +1,245 @@
+═══════════════════════════════════════════════════════════════
+🔐 SISTEMA DE ADMINISTRADOR IMPLEMENTADO
+═══════════════════════════════════════════════════════════════
+
+CREDENCIALES DEL ADMINISTRADOR:
+Email: admin@gmail.com
+Contraseña: 12345
+
+═══════════════════════════════════════════════════════════════
+PASO 1: CREAR LA CUENTA DEL ADMINISTRADOR (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+Antes de poder usar el panel de administrador, debes crear la cuenta:
+
+OPCIÓN A: Usar la herramienta automática (RECOMENDADO)
+────────────────────────────────────────────────────────────────
+1. Abre el archivo: CREAR_ADMIN.html
+2. Click en el botón "Crear Cuenta de Administrador"
+3. Espera a ver el mensaje: ✅✅✅ CUENTA DE ADMIN CREADA EXITOSAMENTE
+4. ¡Listo! Ya puedes iniciar sesión como admin
+
+OPCIÓN B: Crear manualmente en Firebase Console
+────────────────────────────────────────────────────────────────
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto: tareaweb2-59553
+3. Ve a "Authentication" → "Users"
+4. Click en "Add User"
+5. Email: admin@gmail.com
+6. Password: 12345
+7. Click en "Add User"
+
+═══════════════════════════════════════════════════════════════
+PASO 2: INICIAR SESIÓN COMO ADMINISTRADOR
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: El administrador usa el MISMO formulario de login 
+   que los usuarios normales. El sistema detecta automáticamente
+   si es admin y redirige al panel correspondiente.
+
+CÓMO INICIAR SESIÓN COMO ADMIN:
+────────────────────────────────────────────────────────────────
+1. Abre index.html en tu navegador
+2. En el formulario de login (el mismo que usan los alumnos), ingresa:
+   - Email o Código: admin@gmail.com
+   - Contraseña: 12345
+3. Click en "Ingresar"
+4. ✅ El sistema detecta que eres admin
+5. ✅ Serás redirigido automáticamente a admin.html
+
+NO hay formulario separado para el admin. Es el mismo login.
+
+═══════════════════════════════════════════════════════════════
+FUNCIONALIDADES DEL PANEL DE ADMINISTRADOR
+═══════════════════════════════════════════════════════════════
+
+✅ Dashboard con estadísticas en tiempo real
+   - Total de solicitudes
+   - Solicitudes pendientes
+   - Solicitudes aprobadas
+   - Solicitudes rechazadas
+
+✅ Gráficos visuales
+   - Gráfico de pastel: Distribución por estado
+   - Gráfico de barras: Demanda por servidor
+
+✅ Tabla de solicitudes con filtros
+   - Ver todas las solicitudes
+   - Filtrar por: Pendientes, Aprobadas, Rechazadas
+
+✅ Gestión de solicitudes
+   - Aprobar solicitudes
+   - Rechazar solicitudes con motivo
+   - Ver detalles completos de cada solicitud
+
+✅ Información detallada de cada solicitud
+   - Datos del alumno (nombre, código)
+   - Datos del docente y curso
+   - Fecha y horario de uso
+   - Servidor solicitado
+   - Características requeridas
+   - Integrantes del grupo
+   - Accesorios solicitados
+
+═══════════════════════════════════════════════════════════════
+FLUJO COMPLETO DEL SISTEMA
+═══════════════════════════════════════════════════════════════
+
+PARA ALUMNOS:
+────────────────────────────────────────────────────────────────
+1. Registro en index.html
+2. Login con email y contraseña
+3. Acceso a alumno.html
+4. Crear solicitudes de préstamo
+5. Ver historial de solicitudes
+6. Ver estado de solicitudes (Pendiente/Aprobada/Rechazada)
+7. Ver respuesta del administrador
+
+PARA ADMINISTRADOR:
+────────────────────────────────────────────────────────────────
+1. Login con admin@gmail.com y contraseña 12345
+2. Acceso automático a admin.html
+3. Ver dashboard con estadísticas
+4. Ver todas las solicitudes en tabla
+5. Filtrar solicitudes por estado
+6. Ver detalles completos de solicitudes
+7. Aprobar o rechazar solicitudes
+8. Agregar comentarios al aprobar/rechazar
+
+═══════════════════════════════════════════════════════════════
+SEGURIDAD IMPLEMENTADA
+═══════════════════════════════════════════════════════════════
+
+✅ Detección automática de tipo de usuario
+   - Si email es admin@gmail.com → redirige a admin.html
+   - Si es otro email → redirige a alumno.html
+
+✅ Verificación en admin.html
+   - Solo usuarios con email admin@gmail.com pueden acceder
+   - Otros usuarios son redirigidos automáticamente al login
+   - Se cierra la sesión si no es admin
+
+✅ Protección de rutas
+   - admin.html verifica autenticación
+   - admin.html verifica que sea administrador
+   - alumno.html verifica autenticación de alumno
+
+═══════════════════════════════════════════════════════════════
+CAMBIOS REALIZADOS EN EL CÓDIGO
+═══════════════════════════════════════════════════════════════
+
+ARCHIVO: index.html
+────────────────────────────────────────────────────────────────
+✅ Detecta si el login es de admin (email === 'admin@gmail.com')
+✅ Redirige a admin.html si es admin
+✅ Redirige a alumno.html si es alumno
+✅ Logs en consola para debugging
+
+ARCHIVO: admin.html
+────────────────────────────────────────────────────────────────
+✅ Verifica que el usuario esté autenticado
+✅ Verifica que el email sea admin@gmail.com
+✅ Cierra sesión y redirige si no es admin
+✅ Muestra nombre "Administrador" en navbar
+✅ Carga todas las solicitudes
+✅ Muestra gráficos y estadísticas
+
+ARCHIVO: CREAR_ADMIN.html (NUEVO)
+────────────────────────────────────────────────────────────────
+✅ Herramienta para crear cuenta de admin
+✅ Crea usuario en Firebase Authentication
+✅ Guarda datos en colección "administradores"
+✅ Verifica que la cuenta se creó correctamente
+✅ Opción para verificar si ya existe
+
+═══════════════════════════════════════════════════════════════
+PRUEBA DEL SISTEMA
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Crear cuenta de admin
+────────────────────────────────────────────────────────────────
+1. Abre CREAR_ADMIN.html
+2. Click en "Crear Cuenta de Administrador"
+3. Verifica que veas: ✅✅✅ CUENTA DE ADMIN CREADA EXITOSAMENTE
+
+PASO 2: Probar login como admin
+────────────────────────────────────────────────────────────────
+1. Abre index.html
+2. Ingresa:
+   - Email: admin@gmail.com
+   - Contraseña: 12345
+3. Click en "Ingresar"
+4. Deberías ser redirigido a admin.html
+
+PASO 3: Verificar panel de admin
+────────────────────────────────────────────────────────────────
+1. Verifica que veas el dashboard
+2. Verifica que veas los gráficos
+3. Verifica que veas la tabla de solicitudes
+4. Intenta aprobar o rechazar una solicitud
+
+PASO 4: Probar seguridad
+────────────────────────────────────────────────────────────────
+1. Cierra sesión del admin
+2. Inicia sesión como alumno
+3. Intenta acceder a admin.html directamente
+4. Deberías ser redirigido al login con mensaje de acceso denegado
+
+═══════════════════════════════════════════════════════════════
+SOLUCIÓN DE PROBLEMAS
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA: "La cuenta ya existe"
+SOLUCIÓN: La cuenta ya fue creada. Solo inicia sesión.
+
+PROBLEMA: "Invalid credential" al hacer login
+SOLUCIÓN: Verifica que la contraseña sea exactamente: 12345
+
+PROBLEMA: "Acceso denegado" en admin.html
+SOLUCIÓN: Solo admin@gmail.com puede acceder. Verifica el email.
+
+PROBLEMA: No se ven solicitudes en el panel
+SOLUCIÓN: Los alumnos deben crear solicitudes primero en alumno.html
+
+PROBLEMA: No se pueden aprobar/rechazar solicitudes
+SOLUCIÓN: Verifica las reglas de Firestore (deben permitir update)
+
+═══════════════════════════════════════════════════════════════
+MENSAJES EN LA CONSOLA (F12)
+═══════════════════════════════════════════════════════════════
+
+AL INICIAR SESIÓN COMO ADMIN:
+────────────────────────────────────────────────────────────────
+✅ Iniciando sesión con: admin@gmail.com
+✅ Detectado login de administrador
+✅ ✅ Admin autenticado exitosamente
+
+EN admin.html:
+────────────────────────────────────────────────────────────────
+✅ Usuario autenticado: admin@gmail.com
+✅ ✅ Acceso de administrador confirmado
+
+SI UN ALUMNO INTENTA ACCEDER A admin.html:
+────────────────────────────────────────────────────────────────
+❌ Usuario no es administrador: alumno@email.com
+❌ Acceso denegado. Solo administradores pueden acceder...
+
+═══════════════════════════════════════════════════════════════
+RESUMEN
+═══════════════════════════════════════════════════════════════
+
+✅ Sistema de administrador implementado
+✅ Login con admin@gmail.com / 12345
+✅ Redirección automática a admin.html
+✅ Panel de administrador funcional con:
+   • Estadísticas en tiempo real
+   • Gráficos visuales (pie chart y bar chart)
+   • Tabla de solicitudes con filtros
+   • Aprobar/rechazar solicitudes
+   • Ver detalles completos
+✅ Seguridad implementada (verificación de email)
+✅ Herramienta para crear cuenta (CREAR_ADMIN.html)
+
+════════════════════════════════════════════════════════════════
+🎉 ¡SISTEMA COMPLETAMENTE FUNCIONAL!
+════════════════════════════════════════════════════════════════

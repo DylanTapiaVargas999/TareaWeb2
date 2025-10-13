@@ -1,0 +1,104 @@
+═══════════════════════════════════════════════════════════════
+GUÍA DE DIAGNÓSTICO Y SOLUCIÓN DE PROBLEMAS
+═══════════════════════════════════════════════════════════════
+
+PASOS PARA DIAGNOSTICAR EL PROBLEMA:
+═══════════════════════════════════════════════════════════════
+
+PASO 1: ABRIR LA CONSOLA DEL NAVEGADOR
+───────────────────────────────────────────────────────────────
+1. Abre tu aplicación web en el navegador
+2. Presiona F12 (o clic derecho → Inspeccionar)
+3. Ve a la pestaña "Console"
+
+PASO 2: INTENTAR ENVIAR UNA SOLICITUD
+───────────────────────────────────────────────────────────────
+1. Completa el formulario de solicitud
+2. Click en "Enviar Solicitud"
+3. Observa los mensajes en la consola
+
+PASO 3: IDENTIFICAR EL ERROR
+───────────────────────────────────────────────────────────────
+
+ERROR A: "permission-denied" o "Missing or insufficient permissions"
+CAUSA: Las reglas de Firestore no permiten la escritura
+SOLUCIÓN: Sigue las instrucciones en FIRESTORE_RULES.txt
+
+ERROR B: "Failed to get document because the client is offline"
+CAUSA: No hay conexión a Internet o Firebase está bloqueado
+SOLUCIÓN: Verifica tu conexión a Internet
+
+ERROR C: "FirebaseError: Missing or insufficient permissions"
+CAUSA: El usuario no está autenticado correctamente
+SOLUCIÓN: 
+  - Cierra sesión
+  - Vuelve a iniciar sesión
+  - Intenta de nuevo
+
+ERROR D: El botón no hace nada (no muestra error)
+CAUSA: Error en JavaScript
+SOLUCIÓN: Revisa la consola para ver el error específico
+
+═══════════════════════════════════════════════════════════════
+SOLUCIONES RÁPIDAS:
+═══════════════════════════════════════════════════════════════
+
+SOLUCIÓN 1: VERIFICAR AUTENTICACIÓN
+───────────────────────────────────────────────────────────────
+1. En la consola del navegador, escribe:
+   firebase.auth().currentUser
+2. Si muestra "null", no estás autenticado
+3. Cierra sesión y vuelve a iniciar sesión
+
+SOLUCIÓN 2: LIMPIAR CACHÉ
+───────────────────────────────────────────────────────────────
+1. Presiona Ctrl + Shift + R (forzar recarga)
+2. O en DevTools: clic derecho en el botón de recargar → "Vaciar caché y recargar"
+
+SOLUCIÓN 3: VERIFICAR FIREBASE CONSOLE
+───────────────────────────────────────────────────────────────
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto
+3. Ve a "Firestore Database"
+4. Verifica que exista la colección "solicitudes"
+5. Si no existe, se creará automáticamente al enviar la primera solicitud
+
+═══════════════════════════════════════════════════════════════
+CÓDIGO DE PRUEBA EN LA CONSOLA:
+═══════════════════════════════════════════════════════════════
+
+Puedes pegar este código en la consola del navegador para probar
+la conexión con Firestore:
+
+// Ver usuario actual
+console.log('Usuario:', firebase.auth().currentUser);
+
+// Probar lectura de solicitudes
+firebase.firestore().collection('solicitudes').get()
+  .then(snapshot => {
+    console.log('✅ Lectura exitosa. Documentos:', snapshot.size);
+  })
+  .catch(error => {
+    console.error('❌ Error:', error.message);
+  });
+
+═══════════════════════════════════════════════════════════════
+MENSAJES ESPERADOS EN LA CONSOLA:
+═══════════════════════════════════════════════════════════════
+
+Cuando TODO funciona correctamente, deberías ver:
+
+✅ "Enviando solicitud: {nombreResponsable: '...', ...}"
+✅ "Solicitud guardada con ID: [algún ID aleatorio]"
+✅ Alert: "✅ Solicitud enviada con éxito"
+
+═══════════════════════════════════════════════════════════════
+CONTACTO DE SOPORTE:
+═══════════════════════════════════════════════════════════════
+
+Si después de seguir todos estos pasos el problema persiste:
+1. Toma una captura de pantalla de la consola del navegador
+2. Copia el mensaje de error completo
+3. Revisa la pestaña "Network" en DevTools para ver las peticiones
+
+═══════════════════════════════════════════════════════════════

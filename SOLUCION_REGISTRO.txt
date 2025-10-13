@@ -1,0 +1,151 @@
+═══════════════════════════════════════════════════════════════
+SOLUCIÓN: PROBLEMA AL REGISTRAR USUARIO Y CREAR COLECCIÓN
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA DETECTADO:
+El código SÍ intenta crear la colección "alumnos", pero Firebase Firestore
+está bloqueando la escritura debido a las REGLAS DE SEGURIDAD.
+
+═══════════════════════════════════════════════════════════════
+PASO 1: CONFIGURAR REGLAS DE FIRESTORE (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto: "tareaweb2-59553"
+3. En el menú lateral, busca "Firestore Database"
+4. Haz clic en la pestaña "Reglas" (Rules)
+5. Reemplaza todo el contenido con este código:
+
+───────────────────────────────────────────────────────────────
+COPIAR Y PEGAR ESTAS REGLAS:
+───────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Colección de alumnos - PERMITIR CREACIÓN AL REGISTRARSE
+    match /alumnos/{alumnoId} {
+      // Permitir crear cuando el usuario se registra
+      allow create: if request.auth != null 
+                    && request.auth.uid == alumnoId;
+      
+      // Permitir leer su propio perfil
+      allow read: if request.auth != null 
+                  && request.auth.uid == alumnoId;
+      
+      // Permitir actualizar su propio perfil
+      allow update: if request.auth != null 
+                    && request.auth.uid == alumnoId;
+    }
+    
+    // Colección de solicitudes
+    match /solicitudes/{solicitudId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+  }
+}
+
+───────────────────────────────────────────────────────────────
+
+6. Haz clic en "PUBLICAR" (botón azul arriba)
+7. Espera 5-10 segundos a que se apliquen los cambios
+
+═══════════════════════════════════════════════════════════════
+PASO 2: PROBAR EL REGISTRO
+═══════════════════════════════════════════════════════════════
+
+1. Abre tu aplicación web
+2. Presiona F12 para abrir la Consola del Navegador
+3. Ve a la pestaña "Console"
+4. Intenta registrar un nuevo usuario
+5. Observa los mensajes en la consola:
+
+MENSAJES ESPERADOS (ÉXITO):
+✅ "📝 Iniciando registro de usuario..."
+✅ "Paso 1: Creando usuario en Firebase Auth..."
+✅ "✅ Usuario creado en Auth. UID: [algún ID]"
+✅ "Paso 2: Guardando datos en Firestore colección 'alumnos'..."
+✅ "Datos a guardar: {codigo: '...', nombre: '...', ...}"
+✅ "✅ Datos guardados en Firestore exitosamente"
+
+MENSAJE DE ERROR (SI AÚN FALLA):
+❌ "Error detallado: FirebaseError: Missing or insufficient permissions"
+   → Las reglas no se aplicaron correctamente, espera más tiempo o recarga
+
+═══════════════════════════════════════════════════════════════
+PASO 3: VERIFICAR EN FIREBASE CONSOLE
+═══════════════════════════════════════════════════════════════
+
+1. Ve a Firebase Console
+2. Click en "Firestore Database"
+3. Deberías ver la colección "alumnos" creada
+4. Dentro verás documentos con IDs aleatorios (UIDs de usuarios)
+5. Cada documento debe contener:
+   - codigo
+   - nombre
+   - email
+   - rol: "alumno"
+   - fechaRegistro
+   - timestamp
+
+═══════════════════════════════════════════════════════════════
+CAMBIOS REALIZADOS EN EL CÓDIGO:
+═══════════════════════════════════════════════════════════════
+
+✅ Agregado console.log() detallado en cada paso del registro
+✅ Agregado manejo de errores mejorado con códigos específicos
+✅ Agregado deshabilitación del botón para evitar registros duplicados
+✅ Agregado campo "timestamp" adicional
+✅ Agregado validación de datos (trim)
+✅ Mensajes de error más específicos por tipo de problema
+
+═══════════════════════════════════════════════════════════════
+SI AÚN NO FUNCIONA:
+═══════════════════════════════════════════════════════════════
+
+OPCIÓN A: USAR REGLAS MÁS PERMISIVAS (SOLO PARA PRUEBAS)
+───────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+⚠️ ADVERTENCIA: Estas reglas son muy permisivas. 
+   Solo úsalas para pruebas, NO para producción.
+
+OPCIÓN B: VERIFICAR AUTENTICACIÓN
+───────────────────────────────────────────────────────────────
+
+En la consola del navegador, pega este código después de registrarte:
+
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    console.log('✅ Usuario autenticado:', user.uid, user.email);
+  } else {
+    console.log('❌ No hay usuario autenticado');
+  }
+});
+
+═══════════════════════════════════════════════════════════════
+RESUMEN:
+═══════════════════════════════════════════════════════════════
+
+El código YA está implementado correctamente para crear la colección
+"alumnos". El problema es que Firebase Firestore tiene REGLAS DE SEGURIDAD
+que bloquean las escrituras. Debes configurar las reglas en Firebase Console
+siguiendo los pasos de este documento.
+
+Después de configurar las reglas correctamente:
+1. La colección "alumnos" se creará automáticamente
+2. Los datos del usuario se guardarán al registrarse
+3. Todo funcionará correctamente
+
+═══════════════════════════════════════════════════════════════

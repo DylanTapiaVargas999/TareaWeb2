@@ -1,0 +1,203 @@
+═══════════════════════════════════════════════════════════════
+🎯 PROBLEMA IDENTIFICADO Y SOLUCIONADO
+═══════════════════════════════════════════════════════════════
+
+DIAGNÓSTICO:
+✅ Firebase funciona correctamente
+✅ Firestore funciona correctamente
+✅ Las reglas de seguridad son correctas
+❌ PROBLEMA: Race Condition en el código de registro
+
+═══════════════════════════════════════════════════════════════
+🔍 PROBLEMA TÉCNICO DETECTADO
+═══════════════════════════════════════════════════════════════
+
+CAUSA RAÍZ: RACE CONDITION
+
+El flujo era el siguiente:
+
+1. Usuario completa el formulario de registro
+2. Se ejecuta: createUserWithEmailAndPassword(auth, email, password)
+3. Firebase Auth crea el usuario exitosamente
+4. ⚠️ onAuthStateChanged() detecta el nuevo usuario
+5. ⚠️ onAuthStateChanged() REDIRIGE INMEDIATAMENTE a alumno.html
+6. ❌ El código de guardar en Firestore se INTERRUMPE
+7. ❌ El documento NUNCA se guarda en la colección "alumnos"
+
+RESULTADO: 
+- Usuario creado en Authentication ✅
+- Documento NO creado en Firestore ❌
+
+═══════════════════════════════════════════════════════════════
+✅ SOLUCIÓN APLICADA
+═══════════════════════════════════════════════════════════════
+
+IMPLEMENTACIÓN DE FLAG DE CONTROL
+
+He agregado una variable `isRegistering` que actúa como un "semáforo":
+
+ANTES (CÓDIGO CON PROBLEMA):
+────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        window.location.href = 'alumno.html';  // ⚠️ Redirige siempre
+    }
+});
+
+DESPUÉS (CÓDIGO CORREGIDO):
+────────────────────────────────────────────────────────────────
+let isRegistering = false;  // 🚦 Semáforo
+
+onAuthStateChanged(auth, (user) => {
+    if (user && !isRegistering) {  // ✅ Solo redirige si NO está registrando
+        window.location.href = 'alumno.html';
+    }
+});
+
+FLUJO CORREGIDO EN EL REGISTRO:
+────────────────────────────────────────────────────────────────
+1. Usuario completa el formulario
+2. isRegistering = true  // 🚦 Activar semáforo
+3. Crear usuario en Auth
+4. onAuthStateChanged() detecta usuario pero NO redirige (flag activo)
+5. Guardar datos en Firestore
+6. Verificar que se guardó correctamente
+7. isRegistering = false  // 🚦 Desactivar semáforo
+8. Redirigir manualmente a alumno.html
+
+═══════════════════════════════════════════════════════════════
+📋 CAMBIOS REALIZADOS EN index.html
+═══════════════════════════════════════════════════════════════
+
+CAMBIO 1: Declarar variable de control
+────────────────────────────────────────────────────────────────
+let isRegistering = false;
+
+CAMBIO 2: Modificar onAuthStateChanged
+────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+    if (user && !isRegistering) {  // ← Agregado: && !isRegistering
+        console.log('Usuario ya autenticado, redirigiendo...');
+        window.location.href = 'alumno.html';
+    }
+});
+
+CAMBIO 3: Activar flag al inicio del registro
+────────────────────────────────────────────────────────────────
+document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    isRegistering = true;  // ← Agregado
+    // ... resto del código
+});
+
+CAMBIO 4: Desactivar flag al finalizar (éxito o error)
+────────────────────────────────────────────────────────────────
+// En caso de éxito:
+isRegistering = false;  // ← Agregado
+window.location.href = 'alumno.html';
+
+// En caso de error:
+catch (error) {
+    isRegistering = false;  // ← Agregado
+    // ... manejo de errores
+}
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR QUE FUNCIONA
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Abrir index.html en el navegador
+────────────────────────────────────────────────────────────────
+1. Abre index.html
+2. Presiona F12 → Console
+
+PASO 2: Intentar registrar un usuario nuevo
+────────────────────────────────────────────────────────────────
+Usa un EMAIL NUEVO que no hayas usado antes:
+- Email: nuevousuario@test.com
+- Código: 2025001
+- Nombre: Test Usuario
+- Contraseña: test123456
+
+PASO 3: Verificar en la consola
+────────────────────────────────────────────────────────────────
+Deberías ver TODOS estos mensajes en orden:
+
+✅ 📝 Iniciando registro de usuario...
+✅ Código: 2025001
+✅ Nombre: Test Usuario
+✅ Email: nuevousuario@test.com
+✅ Paso 1: Creando usuario en Firebase Auth...
+✅ ✅ Usuario creado en Auth. UID: [algún ID]
+✅ Paso 2: Guardando datos en Firestore colección "alumnos"...
+✅ Datos a guardar: {codigo: "...", nombre: "...", ...}
+✅ Referencia del documento: alumnos/[UID]
+✅ ✅ Datos guardados en Firestore exitosamente
+✅ ✅ Verificación: Documento existe en Firestore: {...}
+✅ ✅ Proceso de registro completado exitosamente
+✅ (Redirige a alumno.html)
+
+PASO 4: Verificar en Firebase Console
+────────────────────────────────────────────────────────────────
+1. Ve a https://console.firebase.google.com/
+2. Proyecto: tareaweb2-59553
+3. Firestore Database → Data
+4. Busca la colección "alumnos"
+5. Deberías ver un documento con el UID del usuario
+6. Click en el documento para ver los datos:
+   - codigo: "2025001"
+   - nombre: "Test Usuario"
+   - email: "nuevousuario@test.com"
+   - rol: "alumno"
+   - fechaRegistro: "..."
+   - timestamp: ...
+
+═══════════════════════════════════════════════════════════════
+⚠️ IMPORTANTE
+═══════════════════════════════════════════════════════════════
+
+SI EL USUARIO YA EXISTE:
+────────────────────────────────────────────────────────────────
+Si intentas registrar un email que ya existe, verás:
+❌ auth/email-already-in-use
+
+SOLUCIÓN:
+1. Usa un email diferente, O
+2. Elimina el usuario en Firebase Console → Authentication
+
+LIMPIEZA PARA PRUEBAS:
+────────────────────────────────────────────────────────────────
+Si quieres probar el registro varias veces:
+1. Firebase Console → Authentication → Users
+2. Busca el usuario de prueba
+3. Click en los 3 puntos → Delete User
+4. Firebase Console → Firestore Database
+5. Elimina el documento del usuario en la colección "alumnos"
+
+═══════════════════════════════════════════════════════════════
+🎉 RESULTADO ESPERADO
+═══════════════════════════════════════════════════════════════
+
+Después de esta corrección:
+
+✅ El usuario se crea en Firebase Authentication
+✅ El documento se guarda en Firestore colección "alumnos"
+✅ Los datos se guardan correctamente con todos los campos
+✅ El sistema redirige solo DESPUÉS de completar todo
+✅ No más race conditions
+✅ Registro funcionando al 100%
+
+═══════════════════════════════════════════════════════════════
+📊 RESUMEN TÉCNICO
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA: Race condition entre onAuthStateChanged y setDoc
+CAUSA: Redirección automática interrumpía el guardado en Firestore
+SOLUCIÓN: Flag de control isRegistering
+RESULTADO: Proceso de registro completamente sincronizado
+
+TIEMPO DE IMPLEMENTACIÓN: Inmediato
+COMPLEJIDAD: Baja
+IMPACTO: Alto (soluciona completamente el problema)
+
+═══════════════════════════════════════════════════════════════

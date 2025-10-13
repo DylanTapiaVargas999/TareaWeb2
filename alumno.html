@@ -138,7 +138,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
@@ -205,105 +205,144 @@
         document.getElementById('solicitudForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const integrantes = Array.from(document.querySelectorAll('.integrante-input'))
-                .map(input => input.value.trim())
-                .filter(val => val !== '');
-
-            const accesorios = [];
-            if (document.getElementById('accMonitor').checked) accesorios.push('Monitor');
-            if (document.getElementById('accTeclado').checked) accesorios.push('Teclado');
-            if (document.getElementById('accMouse').checked) accesorios.push('Mouse');
-
-            const solicitud = {
-                // Identificación
-                nombreResponsable: document.getElementById('nombreResponsable').value,
-                codigoResponsable: document.getElementById('codigoResponsable').value,
-                uidAlumno: currentUser.uid,
-                emailAlumno: alumnoData.email,
-                
-                // Contexto
-                docente: document.getElementById('docente').value,
-                curso: document.getElementById('curso').value,
-                semestre: document.getElementById('semestre').value,
-                
-                // Horario
-                fecha: document.getElementById('fecha').value,
-                horaEntrada: document.getElementById('horaEntrada').value,
-                horaSalida: document.getElementById('horaSalida').value,
-                
-                // Recursos
-                servidor: document.getElementById('servidor').value,
-                tipoServidor: document.getElementById('tipoServidor').value,
-                caracteristicas: document.getElementById('caracteristicas').value,
-                
-                // Logística
-                accesorios: accesorios,
-                integrantes: integrantes,
-                
-                // Estado
-                estado: 'PENDIENTE',
-                fechaSolicitud: new Date().toISOString(),
-                respuestaAdmin: null
-            };
+            // Deshabilitar el botón para evitar envíos duplicados
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
 
             try {
-                await addDoc(collection(db, 'solicitudes'), solicitud);
+                const integrantes = Array.from(document.querySelectorAll('.integrante-input'))
+                    .map(input => input.value.trim())
+                    .filter(val => val !== '');
+
+                const accesorios = [];
+                if (document.getElementById('accMonitor').checked) accesorios.push('Monitor');
+                if (document.getElementById('accTeclado').checked) accesorios.push('Teclado');
+                if (document.getElementById('accMouse').checked) accesorios.push('Mouse');
+
+                const solicitud = {
+                    // Identificación
+                    nombreResponsable: document.getElementById('nombreResponsable').value,
+                    codigoResponsable: document.getElementById('codigoResponsable').value,
+                    uidAlumno: currentUser.uid,
+                    emailAlumno: alumnoData.email,
+                    
+                    // Contexto
+                    docente: document.getElementById('docente').value,
+                    curso: document.getElementById('curso').value,
+                    semestre: document.getElementById('semestre').value,
+                    
+                    // Horario
+                    fecha: document.getElementById('fecha').value,
+                    horaEntrada: document.getElementById('horaEntrada').value,
+                    horaSalida: document.getElementById('horaSalida').value,
+                    
+                    // Recursos
+                    servidor: document.getElementById('servidor').value,
+                    tipoServidor: document.getElementById('tipoServidor').value,
+                    caracteristicas: document.getElementById('caracteristicas').value,
+                    
+                    // Logística
+                    accesorios: accesorios,
+                    integrantes: integrantes,
+                    
+                    // Estado
+                    estado: 'PENDIENTE',
+                    fechaSolicitud: new Date().toISOString(),
+                    timestamp: Date.now(),
+                    respuestaAdmin: null
+                };
+
+                console.log('Enviando solicitud:', solicitud);
+                
+                const docRef = await addDoc(collection(db, 'solicitudes'), solicitud);
+                console.log('Solicitud guardada con ID:', docRef.id);
+                
                 alert('✅ Solicitud enviada con éxito');
                 document.getElementById('solicitudForm').reset();
                 document.getElementById('nombreResponsable').value = alumnoData.nombre;
                 document.getElementById('codigoResponsable').value = alumnoData.codigo;
+                
+                // Cambiar a la pestaña de historial
+                document.querySelector('[data-tab="historial"]').click();
                 loadSolicitudes();
+                
             } catch (error) {
-                alert('❌ Error al enviar solicitud: ' + error.message);
+                console.error('Error detallado:', error);
+                alert('❌ Error al enviar solicitud: ' + error.message + '\n\nRevisando: ' + error.code);
+            } finally {
+                // Rehabilitar el botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
 
         // Load solicitudes
         async function loadSolicitudes() {
-            const q = query(
-                collection(db, 'solicitudes'),
-                where('uidAlumno', '==', currentUser.uid),
-                orderBy('fechaSolicitud', 'desc')
-            );
-
-            const querySnapshot = await getDocs(q);
-            const container = document.getElementById('solicitudesList');
-            
-            if (querySnapshot.empty) {
-                container.innerHTML = '<p class="empty-message">No tienes solicitudes registradas</p>';
-                return;
-            }
-
-            container.innerHTML = '';
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = 'solicitud-card';
+            try {
+                const container = document.getElementById('solicitudesList');
+                container.innerHTML = '<p class="empty-message">Cargando solicitudes...</p>';
                 
-                const statusClass = data.estado === 'ACEPTADO' ? 'status-aceptado' : 
-                                   data.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
+                // Consulta simple sin orderBy para evitar problemas de índice
+                const q = query(
+                    collection(db, 'solicitudes'),
+                    where('uidAlumno', '==', currentUser.uid)
+                );
+
+                const querySnapshot = await getDocs(q);
                 
-                div.innerHTML = `
-                    <div class="solicitud-header">
-                        <div>
-                            <h3>${data.servidor} - ${data.curso}</h3>
-                            <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
-                        </div>
-                        <span class="status-badge ${statusClass}">${data.estado}</span>
-                    </div>
-                    <div class="solicitud-body">
-                        <p><strong>Docente:</strong> ${data.docente}</p>
-                        <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
-                        ${data.respuestaAdmin ? `
-                            <div class="admin-response">
-                                <strong>Respuesta del Administrador:</strong>
-                                <p>${data.respuestaAdmin}</p>
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<p class="empty-message">No tienes solicitudes registradas</p>';
+                    return;
+                }
+
+                // Ordenar en el cliente
+                const solicitudes = [];
+                querySnapshot.forEach((doc) => {
+                    solicitudes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                solicitudes.sort((a, b) => {
+                    const dateA = new Date(a.fechaSolicitud || 0);
+                    const dateB = new Date(b.fechaSolicitud || 0);
+                    return dateB - dateA; // Más reciente primero
+                });
+
+                container.innerHTML = '';
+                solicitudes.forEach((data) => {
+                    const div = document.createElement('div');
+                    div.className = 'solicitud-card';
+                    
+                    const statusClass = data.estado === 'ACEPTADO' ? 'status-aceptado' : 
+                                       data.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
+                    
+                    div.innerHTML = `
+                        <div class="solicitud-header">
+                            <div>
+                                <h3>${data.servidor} - ${data.curso}</h3>
+                                <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
                             </div>
-                        ` : ''}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+                            <span class="status-badge ${statusClass}">${data.estado}</span>
+                        </div>
+                        <div class="solicitud-body">
+                            <p><strong>Docente:</strong> ${data.docente}</p>
+                            <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
+                            ${data.respuestaAdmin ? `
+                                <div class="admin-response">
+                                    <strong>Respuesta del Administrador:</strong>
+                                    <p>${data.respuestaAdmin}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error cargando solicitudes:', error);
+                const container = document.getElementById('solicitudesList');
+                container.innerHTML = '<p class="empty-message">❌ Error al cargar solicitudes: ' + error.message + '</p>';
+            }
         }
     </script>
 </body>

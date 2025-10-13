@@ -148,7 +148,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getFirestore, collection, query, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
@@ -169,12 +169,27 @@
         let pieChart = null;
         let barChart = null;
 
-        // Auth check (en producción, deberías verificar si es admin)
-        onAuthStateChanged(auth, (user) => {
+        // Auth check - Verificar que es administrador
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
+                console.log('No hay usuario autenticado, redirigiendo a login...');
+                alert('❌ Debes iniciar sesión como administrador');
                 window.location.href = 'index.html';
-            } else {
+                return;
+            }
+            
+            console.log('Usuario autenticado:', user.email);
+            
+            // Verificar si es admin
+            if (user.email === 'admin@gmail.com') {
+                console.log('✅ Acceso de administrador confirmado');
+                document.getElementById('adminName').textContent = 'Administrador';
                 loadSolicitudes();
+            } else {
+                console.log('❌ Usuario no es administrador:', user.email);
+                alert('❌ Acceso denegado. Solo administradores pueden acceder a este panel.');
+                await signOut(auth);
+                window.location.href = 'index.html';
             }
         });
 
@@ -186,20 +201,33 @@
 
         // Load solicitudes
         async function loadSolicitudes() {
-            const q = query(collection(db, 'solicitudes'), orderBy('fechaSolicitud', 'desc'));
-            const querySnapshot = await getDocs(q);
-            
-            allSolicitudes = [];
-            querySnapshot.forEach((doc) => {
-                allSolicitudes.push({
-                    id: doc.id,
-                    ...doc.data()
+            try {
+                // Consulta simple sin orderBy para evitar problemas de índice
+                const q = query(collection(db, 'solicitudes'));
+                const querySnapshot = await getDocs(q);
+                
+                allSolicitudes = [];
+                querySnapshot.forEach((doc) => {
+                    allSolicitudes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
                 });
-            });
 
-            updateStats();
-            updateCharts();
-            renderTable();
+                // Ordenar en el cliente
+                allSolicitudes.sort((a, b) => {
+                    const dateA = new Date(a.fechaSolicitud || 0);
+                    const dateB = new Date(b.fechaSolicitud || 0);
+                    return dateB - dateA; // Más reciente primero
+                });
+
+                updateStats();
+                updateCharts();
+                renderTable();
+            } catch (error) {
+                console.error('Error cargando solicitudes:', error);
+                alert('❌ Error al cargar solicitudes: ' + error.message);
+            }
         }
 
         // Update stats

@@ -1,0 +1,174 @@
+═══════════════════════════════════════════════════════════════
+🔥 DIAGNÓSTICO COMPLETO - COLECCIÓN "ALUMNOS"
+═══════════════════════════════════════════════════════════════
+
+SITUACIÓN ACTUAL:
+✅ Las reglas de Firestore están CORRECTAS (permiten lectura/escritura)
+✅ El código de registro está implementado correctamente
+❓ Necesitamos verificar QUÉ está fallando exactamente
+
+═══════════════════════════════════════════════════════════════
+PASO 1: USAR LA HERRAMIENTA DE DIAGNÓSTICO
+═══════════════════════════════════════════════════════════════
+
+He creado un archivo especial para diagnosticar el problema:
+
+1. Abre el archivo: PRUEBA_FIRESTORE.html
+2. Ábrelo en tu navegador web
+3. Verás una página con botones de prueba
+4. Presiona cada botón en orden:
+
+   BOTÓN 1: "Probar Conexión Firebase"
+   → Verifica que Firebase esté conectado
+   
+   BOTÓN 2: "Verificar Autenticación"
+   → Verifica si hay un usuario autenticado
+   
+   BOTÓN 3: "Probar Lectura Firestore"
+   → Intenta leer la colección "alumnos"
+   
+   BOTÓN 4: "Probar Escritura Firestore"
+   → Intenta escribir en la colección "alumnos"
+
+5. Completa el formulario de prueba:
+   - Código: TEST2025001
+   - Nombre: Usuario de Prueba
+   - Email: test@prueba.com (o cualquier email único)
+   - Contraseña: test123456
+
+6. Click en "Registrar Usuario de Prueba"
+
+7. Lee TODOS los mensajes en la consola de diagnóstico
+
+═══════════════════════════════════════════════════════════════
+PASO 2: INTERPRETAR LOS RESULTADOS
+═══════════════════════════════════════════════════════════════
+
+ESCENARIO A: TODO FUNCIONA ✅
+────────────────────────────────────────────────────────────────
+Si ves estos mensajes:
+✅ Usuario creado en Auth. UID: [algún ID]
+✅ Datos guardados en Firestore
+✅ Verificación exitosa: Documento existe en Firestore
+✅✅✅ REGISTRO COMPLETADO CON ÉXITO ✅✅✅
+
+ENTONCES:
+→ El código funciona correctamente
+→ El problema puede estar en tu aplicación principal (index.html)
+→ Verifica que uses los mismos datos de Firebase Config
+
+ESCENARIO B: ERROR DE PERMISOS ❌
+────────────────────────────────────────────────────────────────
+Si ves:
+❌ Error: permission-denied
+Las reglas de Firestore bloquean la escritura
+
+ENTONCES:
+→ Las reglas NO se aplicaron correctamente
+→ Espera 1-2 minutos y vuelve a intentar
+→ O las reglas tienen un error de sintaxis
+
+ESCENARIO C: ERROR DE AUTENTICACIÓN ❌
+────────────────────────────────────────────────────────────────
+Si ves:
+❌ No hay usuario autenticado
+
+ENTONCES:
+→ El usuario no se está creando en Firebase Auth
+→ Verifica la configuración de Authentication en Firebase Console
+
+ESCENARIO D: EMAIL YA EXISTE ❌
+────────────────────────────────────────────────────────────────
+Si ves:
+❌ auth/email-already-in-use
+Este email ya está registrado
+
+ENTONCES:
+→ Usa un email diferente
+→ O elimina el usuario en Firebase Console → Authentication
+
+═══════════════════════════════════════════════════════════════
+PASO 3: VERIFICAR EN FIREBASE CONSOLE
+═══════════════════════════════════════════════════════════════
+
+Después de registrar un usuario de prueba:
+
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto: "tareaweb2-59553"
+3. Ve a "Authentication" → "Users"
+   → Deberías ver el usuario registrado
+4. Ve a "Firestore Database" → "Data"
+   → Deberías ver la colección "alumnos"
+   → Dentro verás documentos con UIDs
+   → Click en un documento para ver los datos
+
+═══════════════════════════════════════════════════════════════
+PASO 4: PROBAR EN LA APLICACIÓN REAL
+═══════════════════════════════════════════════════════════════
+
+Si la prueba funciona en PRUEBA_FIRESTORE.html, entonces:
+
+1. Abre tu aplicación real (index.html)
+2. Presiona F12 → Console
+3. Intenta registrar un usuario nuevo
+4. Busca estos mensajes en la consola:
+
+   ✅ ESPERADO:
+   📝 Iniciando registro de usuario...
+   Paso 1: Creando usuario en Firebase Auth...
+   ✅ Usuario creado en Auth. UID: ...
+   Paso 2: Guardando datos en Firestore colección "alumnos"...
+   Referencia del documento: alumnos/[UID]
+   ✅ Datos guardados en Firestore exitosamente
+   ✅ Verificación: Documento existe en Firestore
+
+   ❌ SI VES ERRORES:
+   Copia TODO el error y búscalo en este documento
+
+═══════════════════════════════════════════════════════════════
+ERRORES COMUNES Y SOLUCIONES
+═══════════════════════════════════════════════════════════════
+
+ERROR 1: "Cannot read properties of undefined"
+CAUSA: Firebase no está inicializado correctamente
+SOLUCIÓN: Verifica que los scripts de Firebase estén cargados
+
+ERROR 2: "auth/email-already-in-use"
+CAUSA: El email ya está registrado
+SOLUCIÓN: Usa otro email o elimina el usuario en Firebase Console
+
+ERROR 3: "permission-denied"
+CAUSA: Las reglas de Firestore no permiten la operación
+SOLUCIÓN: Verifica las reglas (deben permitir si auth != null)
+
+ERROR 4: "network-request-failed"
+CAUSA: Problemas de red o Firebase está bloqueado
+SOLUCIÓN: Verifica tu conexión a Internet
+
+ERROR 5: El botón no hace nada
+CAUSA: Error de JavaScript que detiene la ejecución
+SOLUCIÓN: Abre F12 → Console y busca errores en rojo
+
+═══════════════════════════════════════════════════════════════
+CÓDIGO MEJORADO APLICADO
+═══════════════════════════════════════════════════════════════
+
+He mejorado el código de registro en index.html con:
+
+✅ Console.log detallado en cada paso
+✅ Verificación después de guardar en Firestore
+✅ Manejo de errores mejorado
+✅ Logs de la referencia del documento
+✅ Verificación de que el documento existe después de guardarlo
+
+═══════════════════════════════════════════════════════════════
+SIGUIENTE PASO
+═══════════════════════════════════════════════════════════════
+
+1. Abre PRUEBA_FIRESTORE.html en tu navegador
+2. Realiza todas las pruebas
+3. Toma nota de los resultados
+4. Si todo funciona en la prueba pero no en tu app principal,
+   comparte el error exacto que ves en la consola
+
+═══════════════════════════════════════════════════════════════
