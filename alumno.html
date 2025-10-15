@@ -18,6 +18,7 @@
     <div class="container">
         <div class="tabs">
             <button class="tab-btn active" data-tab="nueva">Nueva Solicitud</button>
+            <button class="tab-btn" data-tab="arduino">Nueva Solicitud Arduino</button>
             <button class="tab-btn" data-tab="historial">Mis Solicitudes</button>
         </div>
 
@@ -124,6 +125,229 @@
             </div>
         </div>
 
+        <!-- Nueva Solicitud Arduino -->
+        <div class="tab-content" id="arduinoTab">
+            <div class="card">
+                <h2>Formulario de Solicitud - Kit Arduino</h2>
+                <form id="solicitudArduinoForm">
+                    <div class="form-section">
+                        <h3>Identificación del Responsable</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre del Responsable *</label>
+                                <input type="text" id="nombreResponsableArduino" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Código del Responsable *</label>
+                                <input type="text" id="codigoResponsableArduino" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Contexto Académico</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="docenteArduino">Docente Responsable (Supervisor) *</label>
+                                <input type="text" id="docenteArduino" placeholder="Nombre del profesor" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cursoArduino">Curso *</label>
+                                <input type="text" id="cursoArduino" placeholder="Ej: Redes y Comunicaciones" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="semestreArduino">Semestre *</label>
+                                <input type="text" id="semestreArduino" placeholder="Ej: 2025-II" required value="2025-II" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Horario de Uso</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fechaArduino">Fecha de Uso *</label>
+                                <input type="date" id="fechaArduino" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaEntradaArduino">Hora de Entrada *</label>
+                                <input type="time" id="horaEntradaArduino" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaSalidaArduino">Hora de Salida *</label>
+                                <input type="time" id="horaSalidaArduino" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Tipo de Alquiler</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tipoAlquiler">Tipo de Alquiler *</label>
+                                <select id="tipoAlquiler" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <option value="completo">Kit Completo</option>
+                                    <option value="individual">Partes Individuales</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="partesIndividualesSection" style="display: none;">
+                        <h3>Seleccione las Partes del Kit Arduino</h3>
+                        
+                        <!-- Placas Arduino -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">🔷 Placas Arduino</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Placa Arduino UNO"> Arduino UNO R3</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Placa Arduino MEGA"> Arduino MEGA 2560</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Placa Arduino NANO"> Arduino NANO</label>
+                            </div>
+                        </div>
+
+                        <!-- Pantallas y Displays -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">📺 Pantallas y Displays</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Pantalla LCD 16x2"> Pantalla LCD 16x2 (con I2C)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Pantalla LCD 20x4"> Pantalla LCD 20x4 (con I2C)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Display 7 Segmentos"> Display 7 Segmentos (4 dígitos)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Display OLED 0.96"> Display OLED 0.96" (128x64)</label>
+                            </div>
+                        </div>
+
+                        <!-- Sensores -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">🔍 Sensores</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor Ultrasónico HC-SR04"> Sensor Ultrasónico HC-SR04 (distancia)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor DHT11"> Sensor DHT11 (Temperatura/Humedad)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor DHT22"> Sensor DHT22 (Temperatura/Humedad - Alta precisión)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor PIR"> Sensor PIR (Detección de movimiento)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor LDR"> Sensor LDR (Fotoresistencia - Luz)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Sensor Gas MQ-2"> Sensor de Gas MQ-2</label>
+                            </div>
+                        </div>
+
+                        <!-- Módulos de Comunicación -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">📡 Módulos de Comunicación</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo Bluetooth HC-05"> Módulo Bluetooth HC-05</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo WiFi ESP8266"> Módulo WiFi ESP8266</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo RFID RC522"> Módulo RFID RC522 (con tarjetas)</label>
+                            </div>
+                        </div>
+
+                        <!-- Motores y Actuadores -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">⚙️ Motores y Actuadores</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Servomotor SG90"> Servomotor SG90 (Micro servo)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Servomotor MG996R"> Servomotor MG996R (Alto torque)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Motor DC"> Motor DC (con driver L298N)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Motor Paso a Paso"> Motor Paso a Paso 28BYJ-48 (con driver)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Buzzer Activo"> Buzzer Activo 5V</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Buzzer Pasivo"> Buzzer Pasivo (Melodías)</label>
+                            </div>
+                        </div>
+
+                        <!-- LEDs e Iluminación -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">💡 LEDs e Iluminación</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="LEDs Básicos"> LEDs Básicos (Set de 5 colores x 5 unidades)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="LEDs RGB"> LEDs RGB (ánodo común)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Tira LED WS2812B"> Tira LED WS2812B (8 LEDs direccionables)</label>
+                            </div>
+                        </div>
+
+                        <!-- Componentes Electrónicos Básicos -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">🔌 Componentes Electrónicos Básicos</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Resistencias"> Resistencias (Set variado: 220Ω, 1KΩ, 10KΩ)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Potenciómetros"> Potenciómetros 10KΩ (x2)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Botones Pulsadores"> Botones Pulsadores (x5)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Condensadores"> Condensadores (Set: electrolíticos y cerámicos)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Transistores"> Transistores (NPN 2N2222 x5)</label>
+                            </div>
+                        </div>
+
+                        <!-- Protoboard y Cables -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">🔗 Protoboard y Conexiones</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Protoboard 830 puntos"> Protoboard 830 puntos</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Protoboard 400 puntos"> Protoboard Mini 400 puntos</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Cables Jumper M-M"> Cables Jumper Macho-Macho (40 unidades)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Cables Jumper M-H"> Cables Jumper Macho-Hembra (40 unidades)</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Cable USB"> Cable USB A-B (para programación)</label>
+                            </div>
+                        </div>
+
+                        <!-- Otros Módulos -->
+                        <div class="componentes-categoria">
+                            <h4 class="categoria-titulo">🎛️ Otros Módulos</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo RTC DS3231"> Módulo Reloj de Tiempo Real DS3231</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo SD Card"> Módulo Lector MicroSD</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo Joystick"> Módulo Joystick Analógico</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo Relé 1 Canal"> Módulo Relé 1 Canal 5V</label>
+                                <label><input type="checkbox" class="parte-arduino" value="Módulo Relé 4 Canales"> Módulo Relé 4 Canales 5V</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-section" id="kitCompletoInfo" style="display: none;">
+                        <h3>Contenido del Kit Completo</h3>
+                        <textarea readonly rows="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
+Kit Arduino Completo incluye:
+• 1x Placa Arduino UNO
+• 1x Pantalla LCD 16x2
+• 1x Display 7 Segmentos
+• 1x Sensor Ultrasónico HC-SR04
+• 1x Sensor DHT11 (Temperatura/Humedad)
+• 1x Sensor PIR (Movimiento)
+• 1x Módulo Bluetooth HC-05
+• 2x Servomotor SG90
+• 1x Motor DC con Driver L298N
+• 1x Protoboard 830 puntos
+• Set de Cables Jumper (40 unidades)
+• Set de LEDs (5 colores, 25 unidades)
+• Set de Resistencias (valores variados)
+• 5x Botones Pulsadores
+• Cable USB para programación
+                        </textarea>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Propósito del Préstamo</h3>
+                        <div class="form-group">
+                            <label for="proposito">Describa el propósito y proyecto a realizar *</label>
+                            <textarea id="proposito" rows="4" placeholder="Ej: Proyecto de sistema de riego automático para el curso de IoT" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Integrantes del Grupo</h3>
+                        <div id="integrantesContainerArduino">
+                            <div class="integrante-item">
+                                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input-arduino">
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addIntegranteArduino" class="btn btn-secondary">+ Agregar Integrante</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">Enviar Solicitud Arduino</button>
+                </form>
+            </div>
+        </div>
+
         <!-- Historial -->
         <div class="tab-content" id="historialTab">
             <div class="card">
@@ -207,6 +431,56 @@
             updateMinTime();
         }
 
+        // Función para establecer fecha y hora mínima - Arduino
+        function setMinDateTimeArduino() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const fechaInput = document.getElementById('fechaArduino');
+            const horaEntradaInput = document.getElementById('horaEntradaArduino');
+            const horaSalidaInput = document.getElementById('horaSalidaArduino');
+            
+            // Establecer fecha mínima como hoy
+            fechaInput.min = today;
+            
+            // Función para actualizar hora mínima según la fecha seleccionada
+            function updateMinTime() {
+                const selectedDate = fechaInput.value;
+                if (selectedDate === today) {
+                    const currentHour = String(now.getHours()).padStart(2, '0');
+                    const currentMinute = String(now.getMinutes()).padStart(2, '0');
+                    const minTime = `${currentHour}:${currentMinute}`;
+                    horaEntradaInput.min = minTime;
+                    
+                    if (horaEntradaInput.value && horaEntradaInput.value < minTime) {
+                        horaEntradaInput.value = '';
+                    }
+                } else {
+                    horaEntradaInput.removeAttribute('min');
+                }
+            }
+            
+            // Validar que hora de salida sea posterior a hora de entrada
+            function validateHoraSalida() {
+                if (horaEntradaInput.value && horaSalidaInput.value) {
+                    if (horaSalidaInput.value <= horaEntradaInput.value) {
+                        alert('⚠️ La hora de salida debe ser posterior a la hora de entrada');
+                        horaSalidaInput.value = '';
+                    }
+                }
+            }
+            
+            // Listeners para validación en tiempo real
+            fechaInput.addEventListener('change', updateMinTime);
+            horaEntradaInput.addEventListener('change', () => {
+                updateMinTime();
+                validateHoraSalida();
+            });
+            horaSalidaInput.addEventListener('change', validateHoraSalida);
+            
+            // Inicializar
+            updateMinTime();
+        }
+
         // Auth state
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -217,9 +491,13 @@
                     document.getElementById('userName').textContent = alumnoData.nombre;
                     document.getElementById('nombreResponsable').value = alumnoData.nombre;
                     document.getElementById('codigoResponsable').value = alumnoData.codigo;
+                    // También llenar los campos del formulario Arduino
+                    document.getElementById('nombreResponsableArduino').value = alumnoData.nombre;
+                    document.getElementById('codigoResponsableArduino').value = alumnoData.codigo;
                     loadSolicitudes();
                     // Establecer validaciones de fecha y hora
                     setMinDateTime();
+                    setMinDateTimeArduino();
                 }
             } else {
                 window.location.href = 'index.html';
@@ -252,6 +530,36 @@
                 <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
             `;
             container.appendChild(div);
+        });
+
+        // Add integrante Arduino
+        document.getElementById('addIntegranteArduino').addEventListener('click', () => {
+            const container = document.getElementById('integrantesContainerArduino');
+            const div = document.createElement('div');
+            div.className = 'integrante-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input-arduino">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(div);
+        });
+
+        // Manejador del tipo de alquiler Arduino
+        document.getElementById('tipoAlquiler').addEventListener('change', function() {
+            const tipoAlquiler = this.value;
+            const partesSection = document.getElementById('partesIndividualesSection');
+            const kitInfo = document.getElementById('kitCompletoInfo');
+            
+            if (tipoAlquiler === 'individual') {
+                partesSection.style.display = 'block';
+                kitInfo.style.display = 'none';
+            } else if (tipoAlquiler === 'completo') {
+                partesSection.style.display = 'none';
+                kitInfo.style.display = 'block';
+            } else {
+                partesSection.style.display = 'none';
+                kitInfo.style.display = 'none';
+            }
         });
 
         // Mapeo de servidores con sus tipos y características enlazados
@@ -400,29 +708,160 @@
             }
         });
 
+        // Submit solicitud Arduino
+        document.getElementById('solicitudArduinoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validar fecha y hora
+            const fechaSeleccionada = document.getElementById('fechaArduino').value;
+            const horaEntrada = document.getElementById('horaEntradaArduino').value;
+            const horaSalida = document.getElementById('horaSalidaArduino').value;
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            
+            if (fechaSeleccionada < today) {
+                alert('❌ No se pueden solicitar fechas anteriores a hoy');
+                return;
+            }
+            
+            if (fechaSeleccionada === today) {
+                const currentHour = String(now.getHours()).padStart(2, '0');
+                const currentMinute = String(now.getMinutes()).padStart(2, '0');
+                const minTime = `${currentHour}:${currentMinute}`;
+                
+                if (horaEntrada < minTime) {
+                    alert('❌ No se pueden solicitar horas en el pasado');
+                    return;
+                }
+            }
+            
+            if (horaSalida <= horaEntrada) {
+                alert('❌ La hora de salida debe ser posterior a la hora de entrada');
+                return;
+            }
+
+            // Validar que se haya seleccionado algo en caso de partes individuales
+            const tipoAlquiler = document.getElementById('tipoAlquiler').value;
+            let partesSeleccionadas = [];
+            
+            if (tipoAlquiler === 'individual') {
+                partesSeleccionadas = Array.from(document.querySelectorAll('.parte-arduino:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                if (partesSeleccionadas.length === 0) {
+                    alert('❌ Debe seleccionar al menos una parte del kit Arduino');
+                    return;
+                }
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            try {
+                const integrantes = Array.from(document.querySelectorAll('.integrante-input-arduino'))
+                    .map(input => input.value.trim())
+                    .filter(val => val !== '');
+
+                const solicitud = {
+                    // Identificación
+                    nombreResponsable: document.getElementById('nombreResponsableArduino').value,
+                    codigoResponsable: document.getElementById('codigoResponsableArduino').value,
+                    uidAlumno: currentUser.uid,
+                    emailAlumno: alumnoData.email,
+                    
+                    // Contexto
+                    docente: document.getElementById('docenteArduino').value,
+                    curso: document.getElementById('cursoArduino').value,
+                    semestre: document.getElementById('semestreArduino').value,
+                    
+                    // Horario
+                    fecha: fechaSeleccionada,
+                    horaEntrada: horaEntrada,
+                    horaSalida: horaSalida,
+                    
+                    // Recursos Arduino
+                    tipoAlquiler: tipoAlquiler,
+                    partesSeleccionadas: tipoAlquiler === 'individual' ? partesSeleccionadas : ['Kit Completo'],
+                    proposito: document.getElementById('proposito').value,
+                    
+                    // Logística
+                    integrantes: integrantes,
+                    
+                    // Estado
+                    estado: 'PENDIENTE',
+                    tipoSolicitud: 'ARDUINO',
+                    fechaSolicitud: new Date().toISOString(),
+                    timestamp: Date.now(),
+                    respuestaAdmin: null
+                };
+
+                console.log('Enviando solicitud Arduino:', solicitud);
+                
+                const docRef = await addDoc(collection(db, 'solicitudes_arduino'), solicitud);
+                console.log('Solicitud Arduino guardada con ID:', docRef.id);
+                
+                alert('✅ Solicitud de Arduino enviada con éxito');
+                document.getElementById('solicitudArduinoForm').reset();
+                document.getElementById('nombreResponsableArduino').value = alumnoData.nombre;
+                document.getElementById('codigoResponsableArduino').value = alumnoData.codigo;
+                document.getElementById('semestreArduino').value = '2025-II';
+                
+                // Ocultar secciones
+                document.getElementById('partesIndividualesSection').style.display = 'none';
+                document.getElementById('kitCompletoInfo').style.display = 'none';
+                
+                // Cambiar a la pestaña de historial
+                document.querySelector('[data-tab="historial"]').click();
+                loadSolicitudes();
+                
+            } catch (error) {
+                console.error('Error detallado:', error);
+                alert('❌ Error al enviar solicitud: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
         // Load solicitudes
         async function loadSolicitudes() {
             try {
                 const container = document.getElementById('solicitudesList');
                 container.innerHTML = '<p class="empty-message">Cargando solicitudes...</p>';
                 
-                // Consulta simple sin orderBy para evitar problemas de índice
-                const q = query(
+                // Cargar solicitudes de servidores
+                const q1 = query(
                     collection(db, 'solicitudes'),
                     where('uidAlumno', '==', currentUser.uid)
                 );
 
-                const querySnapshot = await getDocs(q);
+                // Cargar solicitudes de Arduino
+                const q2 = query(
+                    collection(db, 'solicitudes_arduino'),
+                    where('uidAlumno', '==', currentUser.uid)
+                );
+
+                const [querySnapshot1, querySnapshot2] = await Promise.all([
+                    getDocs(q1),
+                    getDocs(q2)
+                ]);
                 
-                if (querySnapshot.empty) {
+                if (querySnapshot1.empty && querySnapshot2.empty) {
                     container.innerHTML = '<p class="empty-message">No tienes solicitudes registradas</p>';
                     return;
                 }
 
-                // Ordenar en el cliente
+                // Combinar y ordenar todas las solicitudes
                 const solicitudes = [];
-                querySnapshot.forEach((doc) => {
-                    solicitudes.push({ id: doc.id, ...doc.data() });
+                
+                querySnapshot1.forEach((doc) => {
+                    solicitudes.push({ id: doc.id, tipo: 'SERVIDOR', ...doc.data() });
+                });
+                
+                querySnapshot2.forEach((doc) => {
+                    solicitudes.push({ id: doc.id, tipo: 'ARDUINO', ...doc.data() });
                 });
                 
                 solicitudes.sort((a, b) => {
@@ -439,25 +878,55 @@
                     const statusClass = data.estado === 'ACEPTADO' ? 'status-aceptado' : 
                                        data.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
                     
-                    div.innerHTML = `
-                        <div class="solicitud-header">
-                            <div>
-                                <h3>${data.servidor} - ${data.curso}</h3>
-                                <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
-                            </div>
-                            <span class="status-badge ${statusClass}">${data.estado}</span>
-                        </div>
-                        <div class="solicitud-body">
-                            <p><strong>Docente:</strong> ${data.docente}</p>
-                            <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
-                            ${data.respuestaAdmin ? `
-                                <div class="admin-response">
-                                    <strong>Respuesta del Administrador:</strong>
-                                    <p>${data.respuestaAdmin}</p>
+                    // Diferentes formatos según el tipo de solicitud
+                    if (data.tipo === 'ARDUINO') {
+                        const recursoTexto = data.tipoAlquiler === 'completo' 
+                            ? 'Kit Arduino Completo' 
+                            : `Partes: ${data.partesSeleccionadas.join(', ')}`;
+                        
+                        div.innerHTML = `
+                            <div class="solicitud-header">
+                                <div>
+                                    <h3>🔧 Arduino - ${data.curso}</h3>
+                                    <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
                                 </div>
-                            ` : ''}
-                        </div>
-                    `;
+                                <span class="status-badge ${statusClass}">${data.estado}</span>
+                            </div>
+                            <div class="solicitud-body">
+                                <p><strong>Tipo:</strong> ${recursoTexto}</p>
+                                <p><strong>Docente:</strong> ${data.docente}</p>
+                                <p><strong>Propósito:</strong> ${data.proposito}</p>
+                                <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
+                                ${data.respuestaAdmin ? `
+                                    <div class="admin-response">
+                                        <strong>Respuesta del Administrador:</strong>
+                                        <p>${data.respuestaAdmin}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <div class="solicitud-header">
+                                <div>
+                                    <h3>🖥️ ${data.servidor} - ${data.curso}</h3>
+                                    <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
+                                </div>
+                                <span class="status-badge ${statusClass}">${data.estado}</span>
+                            </div>
+                            <div class="solicitud-body">
+                                <p><strong>Docente:</strong> ${data.docente}</p>
+                                <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
+                                ${data.respuestaAdmin ? `
+                                    <div class="admin-response">
+                                        <strong>Respuesta del Administrador:</strong>
+                                        <p>${data.respuestaAdmin}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+                    
                     container.appendChild(div);
                 });
             } catch (error) {

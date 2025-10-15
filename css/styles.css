@@ -346,6 +346,25 @@ body {
     font-size: 1rem;
 }
 
+.integrante-input-arduino {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.integrante-input-arduino:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.integrante-input-arduino::placeholder {
+    color: #999;
+}
+
 .btn-remove {
     width: 40px;
     height: 40px;
@@ -853,5 +872,593 @@ tbody tr:hover {
     .calendar-legend {
         font-size: 0.75rem;
         gap: 0.75rem;
+    }
+}
+
+/* Estilos para Categorías de Componentes Arduino */
+.componentes-categoria {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s;
+}
+
+.componentes-categoria:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left-color: var(--success-color);
+}
+
+.categoria-titulo {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.componentes-categoria .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.componentes-categoria .checkbox-group label {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 2px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.componentes-categoria .checkbox-group label:hover {
+    border-color: var(--primary-color);
+    background: #f0f7ff;
+    transform: translateX(5px);
+}
+
+.componentes-categoria .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--success-color);
+}
+
+.componentes-categoria .checkbox-group input[type="checkbox"]:checked + label,
+.componentes-categoria .checkbox-group label:has(input[type="checkbox"]:checked) {
+    background: #e7f5ec;
+    border-color: var(--success-color);
+    font-weight: 500;
+}
+
+/* Colores específicos por categoría */
+.componentes-categoria:nth-child(1) {
+    border-left-color: #007bff; /* Placas - Azul */
+}
+
+.componentes-categoria:nth-child(2) {
+    border-left-color: #6f42c1; /* Pantallas - Púrpura */
+}
+
+.componentes-categoria:nth-child(3) {
+    border-left-color: #28a745; /* Sensores - Verde */
+}
+
+.componentes-categoria:nth-child(4) {
+    border-left-color: #17a2b8; /* Comunicación - Cyan */
+}
+
+.componentes-categoria:nth-child(5) {
+    border-left-color: #fd7e14; /* Motores - Naranja */
+}
+
+.componentes-categoria:nth-child(6) {
+    border-left-color: #ffc107; /* LEDs - Amarillo */
+}
+
+.componentes-categoria:nth-child(7) {
+    border-left-color: #dc3545; /* Componentes Básicos - Rojo */
+}
+
+.componentes-categoria:nth-child(8) {
+    border-left-color: #6c757d; /* Protoboard - Gris */
+}
+
+.componentes-categoria:nth-child(9) {
+    border-left-color: #e83e8c; /* Otros - Rosa */
+}
+
+/* Responsive para categorías */
+@media (max-width: 768px) {
+    .componentes-categoria .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .componentes-categoria {
+        padding: 1rem;
+    }
+    
+    .categoria-titulo {
+        font-size: 1rem;
+    }
+}
+
+/* Estilos para Kit Completo */
+.kit-completo-categoria {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s;
+}
+
+.kit-completo-categoria:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateX(5px);
+}
+
+.kit-categoria-titulo {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kit-lista {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.kit-lista li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid var(--success-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
+}
+
+.kit-lista li:hover {
+    background: #e7f5ec;
+    transform: translateX(5px);
+}
+
+.kit-lista .cantidad {
+    background: var(--success-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Colores específicos por categoría del kit */
+.kit-completo-categoria:nth-child(2) {
+    border-left-color: #007bff; /* Placa - Azul */
+}
+
+.kit-completo-categoria:nth-child(3) {
+    border-left-color: #6f42c1; /* Pantallas - Púrpura */
+}
+
+.kit-completo-categoria:nth-child(4) {
+    border-left-color: #28a745; /* Sensores - Verde */
+}
+
+.kit-completo-categoria:nth-child(5) {
+    border-left-color: #17a2b8; /* Comunicación - Cyan */
+}
+
+.kit-completo-categoria:nth-child(6) {
+    border-left-color: #fd7e14; /* Motores - Naranja */
+}
+
+.kit-completo-categoria:nth-child(7) {
+    border-left-color: #ffc107; /* LEDs - Amarillo */
+}
+
+.kit-completo-categoria:nth-child(8) {
+    border-left-color: #dc3545; /* Componentes - Rojo */
+}
+
+.kit-completo-categoria:nth-child(9) {
+    border-left-color: #6c757d; /* Protoboard - Gris */
+}
+
+.kit-completo-categoria:nth-child(10) {
+    border-left-color: #e83e8c; /* Módulos - Rosa */
+}
+
+.kit-completo-categoria:nth-child(11) {
+    border-left-color: #20c997; /* Accesorios - Verde agua */
+}
+
+/* Resumen del Kit */
+.kit-resumen {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kit-resumen h4 {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.resumen-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+}
+
+.stat-numero {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.stat-texto {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+.kit-nota {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+.kit-nota strong {
+    color: #ffc107;
+}
+
+/* Responsive para Kit Completo */
+@media (max-width: 768px) {
+    .kit-completo-categoria {
+        padding: 1rem;
+    }
+    
+    .kit-categoria-titulo {
+        font-size: 1rem;
+    }
+    
+    .kit-lista li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .resumen-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .stat-numero {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===============================================
+   ESTILOS PARA PANEL DE ADMINISTRACIÓN - ARDUINO
+   =============================================== */
+
+/* Tabs de navegación Admin (Servidores/Arduino) */
+.admin-tabs {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.admin-tabs .tab-btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    background: var(--light-bg);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.admin-tabs .tab-btn:hover {
+    background: var(--border-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.admin-tabs .tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Secciones Admin */
+.admin-section {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Filter buttons para Arduino */
+.filter-btn-arduino {
+    padding: 0.75rem 1.5rem;
+    background: var(--light-bg);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--dark-text);
+}
+
+.filter-btn-arduino:hover {
+    background: var(--border-color);
+    transform: translateY(-2px);
+}
+
+.filter-btn-arduino.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Botones de acción en tablas */
+.action-btns {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.action-btns .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    min-width: auto;
+}
+
+/* Botones tamaño pequeño */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* Mejoras para modales de Arduino */
+#detallesArduinoModal .detalle-section,
+#aprobarArduinoModal .form-group,
+#rechazarArduinoModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#detallesArduinoModal .detalle-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+#detallesArduinoModal .detalle-section ul {
+    list-style-position: inside;
+    padding-left: 1rem;
+}
+
+#detallesArduinoModal .detalle-section ul li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--light-bg);
+}
+
+/* Estilos para lista de partes seleccionadas */
+#detallesArduinoModal .detalle-section ul li::marker {
+    color: var(--success-color);
+}
+
+/* Dashboard Arduino - Ajustes específicos */
+#arduinoSection .dashboard h2 {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#arduinoSection .stat-card {
+    border-left: 4px solid transparent;
+}
+
+#arduinoSection .stat-card.stat-total {
+    border-left-color: var(--primary-color);
+}
+
+#arduinoSection .stat-card.stat-pendiente {
+    border-left-color: var(--warning-color);
+}
+
+#arduinoSection .stat-card.stat-aprobado {
+    border-left-color: var(--success-color);
+}
+
+#arduinoSection .stat-card.stat-rechazado {
+    border-left-color: var(--danger-color);
+}
+
+/* Tabla Arduino - Ajustes */
+#solicitudesArduinoTable {
+    font-size: 0.95rem;
+}
+
+#solicitudesArduinoTable th {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+#solicitudesArduinoTable tbody tr {
+    transition: all 0.3s;
+}
+
+#solicitudesArduinoTable tbody tr:hover {
+    background: #f0f7ff;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Gráficas Arduino */
+.chart-card canvas {
+    max-height: 400px;
+}
+
+/* Loading y Empty states */
+.loading,
+.empty-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+.loading::before {
+    content: "⏳ ";
+}
+
+.empty-message::before {
+    content: "📭 ";
+}
+
+/* Responsive para Admin Arduino */
+@media (max-width: 992px) {
+    .admin-tabs {
+        flex-direction: column;
+    }
+    
+    .admin-tabs .tab-btn {
+        width: 100%;
+    }
+    
+    .filter-tabs {
+        justify-content: center;
+    }
+    
+    .action-btns {
+        flex-direction: column;
+    }
+    
+    .action-btns .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-tabs .tab-btn {
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .filter-btn-arduino {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .table-container {
+        font-size: 0.875rem;
+    }
+    
+    th, td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-tabs .tab-btn {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .filter-tabs {
+        gap: 0.5rem;
+    }
+    
+    .filter-btn-arduino {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
     }
 }

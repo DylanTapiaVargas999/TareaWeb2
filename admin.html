@@ -17,9 +17,17 @@
     </nav>
 
     <div class="container">
+        <!-- Navegación entre secciones -->
+        <div class="admin-tabs" style="margin-bottom: 2rem;">
+            <button class="tab-btn active" data-section="servidores">🖥️ Solicitudes de Servidores</button>
+            <button class="tab-btn" data-section="arduino">🔧 Solicitudes de Arduino</button>
+        </div>
+
+        <!-- SECCIÓN SERVIDORES -->
+        <div class="admin-section" id="servidoresSection" style="display: block;">
         <!-- Dashboard -->
         <div class="dashboard">
-            <h2>Dashboard de Solicitudes</h2>
+            <h2>Dashboard de Solicitudes de Servidores</h2>
             
             <!-- Indicadores Numéricos -->
             <div class="stats-grid">
@@ -112,6 +120,97 @@
                 </table>
             </div>
         </div>
+        </div>
+        <!-- FIN SECCIÓN SERVIDORES -->
+
+        <!-- SECCIÓN ARDUINO -->
+        <div class="admin-section" id="arduinoSection" style="display: none;">
+        <!-- Dashboard Arduino -->
+        <div class="dashboard">
+            <h2>Dashboard de Solicitudes de Arduino</h2>
+            
+            <!-- Indicadores Numéricos -->
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <h3 id="totalSolicitudesArduino">0</h3>
+                        <p>Total Solicitudes</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-pendiente">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="totalPendientesArduino">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-aprobado">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3 id="totalAprobadasArduino">0</h3>
+                        <p>Aprobadas</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-rechazado">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h3 id="totalRechazadasArduino">0</h3>
+                        <p>Rechazadas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfica de Arduino -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Tipo de Alquiler - Arduino</h3>
+                    <canvas id="arduinoChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Componentes Más Solicitados</h3>
+                    <canvas id="componentesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Solicitudes Arduino -->
+        <div class="card">
+            <h2>Gestión de Solicitudes Arduino</h2>
+            
+            <div class="filter-tabs">
+                <button class="filter-btn-arduino active" data-filter="TODAS">Todas</button>
+                <button class="filter-btn-arduino" data-filter="PENDIENTE">Pendientes</button>
+                <button class="filter-btn-arduino" data-filter="ACEPTADO">Aprobadas</button>
+                <button class="filter-btn-arduino" data-filter="RECHAZADO">Rechazadas</button>
+            </div>
+
+            <div class="table-container">
+                <table id="solicitudesArduinoTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Alumno</th>
+                            <th>Docente</th>
+                            <th>Curso</th>
+                            <th>Fecha</th>
+                            <th>Horario</th>
+                            <th>Tipo Alquiler</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="solicitudesArduinoTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">Cargando solicitudes de Arduino...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        <!-- FIN SECCIÓN ARDUINO -->
+
     </div>
 
     <!-- Modal Detalles -->
@@ -157,6 +256,50 @@
         </div>
     </div>
 
+    <!-- Modales para Arduino -->
+    <!-- Modal Detalles Arduino -->
+    <div id="detallesArduinoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detalles de la Solicitud Arduino</h2>
+            <div id="detallesArduinoContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobar Arduino -->
+    <div id="aprobarArduinoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Aprobar Solicitud Arduino</h2>
+            <form id="aprobarArduinoForm">
+                <div class="form-group">
+                    <label for="lugarAsignadoArduino">Lugar de Retiro *</label>
+                    <input type="text" id="lugarAsignadoArduino" placeholder="Ej: Almacén de Electrónica - Piso 3" required>
+                </div>
+                <div class="form-group">
+                    <label for="notasAprobacionArduino">Notas Adicionales</label>
+                    <textarea id="notasAprobacionArduino" rows="3" placeholder="Instrucciones adicionales (horario de retiro, precauciones, etc.)..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Confirmar Aprobación</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Rechazar Arduino -->
+    <div id="rechazarArduinoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Rechazar Solicitud Arduino</h2>
+            <form id="rechazarArduinoForm">
+                <div class="form-group">
+                    <label for="motivoRechazoArduino">Motivo del Rechazo *</label>
+                    <textarea id="motivoRechazoArduino" rows="4" placeholder="Explica por qué se rechaza esta solicitud..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">Confirmar Rechazo</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
@@ -180,6 +323,14 @@
         let selectedSolicitudId = null;
         let barChart = null;
         let currentCalendarDate = new Date();
+        
+        // Variables para Arduino
+        let allSolicitudesArduino = [];
+        let currentFilterArduino = 'TODAS';
+        let selectedSolicitudArduinoId = null;
+        let arduinoChart = null;
+        let componentesChart = null;
+        let currentSection = 'servidores';
 
         // Auth check - Verificar que es administrador
         onAuthStateChanged(auth, async (user) => {
@@ -197,6 +348,7 @@
                 console.log('✅ Acceso de administrador confirmado');
                 document.getElementById('adminName').textContent = 'Administrador';
                 loadSolicitudes();
+                loadSolicitudesArduino();
             } else {
                 console.log('❌ Usuario no es administrador:', user.email);
                 alert('❌ Acceso denegado. Solo administradores pueden acceder a este panel.');
@@ -209,6 +361,24 @@
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await signOut(auth);
             window.location.href = 'index.html';
+        });
+
+        // Navegación entre secciones (Servidores / Arduino)
+        document.querySelectorAll('.admin-tabs .tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Actualizar botones activos
+                document.querySelectorAll('.admin-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Mostrar/ocultar secciones
+                const section = btn.dataset.section;
+                currentSection = section;
+                
+                document.getElementById('servidoresSection').style.display = 
+                    section === 'servidores' ? 'block' : 'none';
+                document.getElementById('arduinoSection').style.display = 
+                    section === 'arduino' ? 'block' : 'none';
+            });
         });
 
         // Load solicitudes
@@ -572,6 +742,298 @@
                 document.getElementById('rechazarModal').style.display = 'none';
                 document.getElementById('rechazarForm').reset();
                 loadSolicitudes();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        });
+
+        // ===============================================
+        // FUNCIONES PARA ARDUINO
+        // ===============================================
+
+        // Load solicitudes Arduino
+        async function loadSolicitudesArduino() {
+            try {
+                const q = query(collection(db, 'solicitudes_arduino'));
+                const querySnapshot = await getDocs(q);
+                
+                allSolicitudesArduino = [];
+                querySnapshot.forEach((doc) => {
+                    allSolicitudesArduino.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                // Ordenar en el cliente
+                allSolicitudesArduino.sort((a, b) => {
+                    const dateA = new Date(a.fechaSolicitud || 0);
+                    const dateB = new Date(b.fechaSolicitud || 0);
+                    return dateB - dateA;
+                });
+
+                updateStatsArduino();
+                updateChartsArduino();
+                renderTableArduino();
+            } catch (error) {
+                console.error('Error cargando solicitudes Arduino:', error);
+                alert('❌ Error al cargar solicitudes Arduino: ' + error.message);
+            }
+        }
+
+        // Update stats Arduino
+        function updateStatsArduino() {
+            const total = allSolicitudesArduino.length;
+            const pendientes = allSolicitudesArduino.filter(s => s.estado === 'PENDIENTE').length;
+            const aprobadas = allSolicitudesArduino.filter(s => s.estado === 'ACEPTADO').length;
+            const rechazadas = allSolicitudesArduino.filter(s => s.estado === 'RECHAZADO').length;
+
+            document.getElementById('totalSolicitudesArduino').textContent = total;
+            document.getElementById('totalPendientesArduino').textContent = pendientes;
+            document.getElementById('totalAprobadasArduino').textContent = aprobadas;
+            document.getElementById('totalRechazadasArduino').textContent = rechazadas;
+        }
+
+        // Update charts Arduino
+        function updateChartsArduino() {
+            // Gráfica de tipo de alquiler
+            const tiposAlquiler = {
+                'completo': 0,
+                'individual': 0
+            };
+            
+            allSolicitudesArduino.forEach(s => {
+                tiposAlquiler[s.tipoAlquiler] = (tiposAlquiler[s.tipoAlquiler] || 0) + 1;
+            });
+
+            const arduinoCtx = document.getElementById('arduinoChart').getContext('2d');
+            if (arduinoChart) arduinoChart.destroy();
+            arduinoChart = new Chart(arduinoCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Kit Completo', 'Partes Individuales'],
+                    datasets: [{
+                        data: [tiposAlquiler.completo, tiposAlquiler.individual],
+                        backgroundColor: ['#007bff', '#28a745']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Gráfica de componentes más solicitados
+            const componentes = {};
+            allSolicitudesArduino.forEach(s => {
+                if (s.tipoAlquiler === 'individual' && s.partesSeleccionadas) {
+                    s.partesSeleccionadas.forEach(parte => {
+                        componentes[parte] = (componentes[parte] || 0) + 1;
+                    });
+                }
+            });
+
+            // Ordenar y tomar top 10
+            const topComponentes = Object.entries(componentes)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const componentesCtx = document.getElementById('componentesChart').getContext('2d');
+            if (componentesChart) componentesChart.destroy();
+            componentesChart = new Chart(componentesCtx, {
+                type: 'bar',
+                data: {
+                    labels: topComponentes.map(c => c[0]),
+                    datasets: [{
+                        label: 'Veces Solicitado',
+                        data: topComponentes.map(c => c[1]),
+                        backgroundColor: '#17a2b8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter buttons Arduino
+        document.querySelectorAll('.filter-btn-arduino').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn-arduino').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilterArduino = btn.dataset.filter;
+                renderTableArduino();
+            });
+        });
+
+        // Render table Arduino
+        function renderTableArduino() {
+            const tbody = document.getElementById('solicitudesArduinoTableBody');
+            const filtered = currentFilterArduino === 'TODAS' ? 
+                allSolicitudesArduino : 
+                allSolicitudesArduino.filter(s => s.estado === currentFilterArduino);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-message">No hay solicitudes de Arduino</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, index) => {
+                const statusClass = s.estado === 'ACEPTADO' ? 'status-aceptado' : 
+                                   s.estado === 'RECHAZADO' ? 'status-rechazado' : 'status-pendiente';
+                
+                const tipoTexto = s.tipoAlquiler === 'completo' ? 'Kit Completo' : 'Partes Individuales';
+                
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${s.nombreResponsable}<br><small>${s.codigoResponsable}</small></td>
+                        <td>${s.docente}</td>
+                        <td>${s.curso}</td>
+                        <td>${s.fecha}</td>
+                        <td>${s.horaEntrada} - ${s.horaSalida}</td>
+                        <td>${tipoTexto}</td>
+                        <td><span class="status-badge ${statusClass}">${s.estado}</span></td>
+                        <td class="action-btns">
+                            <button class="btn btn-info btn-sm" onclick="window.verDetallesArduino('${s.id}')">👁️ Detalles</button>
+                            ${s.estado === 'PENDIENTE' ? `
+                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobarArduino('${s.id}')">✅ Aprobar</button>
+                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazarArduino('${s.id}')">❌ Rechazar</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Modals Arduino
+        const modalsArduino = ['detallesArduino', 'aprobarArduino', 'rechazarArduino'];
+        modalsArduino.forEach(modalName => {
+            const modal = document.getElementById(`${modalName}Modal`);
+            const span = modal.querySelector('.close');
+            span.onclick = () => modal.style.display = 'none';
+        });
+
+        // Ver detalles Arduino
+        window.verDetallesArduino = (id) => {
+            const solicitud = allSolicitudesArduino.find(s => s.id === id);
+            const content = document.getElementById('detallesArduinoContent');
+            
+            const partesHTML = solicitud.tipoAlquiler === 'completo' ? 
+                '<p><strong>Tipo:</strong> Kit Completo Arduino</p>' :
+                `<p><strong>Partes Seleccionadas:</strong></p>
+                 <ul>${solicitud.partesSeleccionadas.map(p => `<li>${p}</li>`).join('')}</ul>`;
+            
+            content.innerHTML = `
+                <div class="detalle-section">
+                    <h3>Responsable</h3>
+                    <p><strong>Nombre:</strong> ${solicitud.nombreResponsable}</p>
+                    <p><strong>Código:</strong> ${solicitud.codigoResponsable}</p>
+                    <p><strong>Email:</strong> ${solicitud.emailAlumno}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Contexto Académico</h3>
+                    <p><strong>Docente:</strong> ${solicitud.docente}</p>
+                    <p><strong>Curso:</strong> ${solicitud.curso}</p>
+                    <p><strong>Semestre:</strong> ${solicitud.semestre}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Horario</h3>
+                    <p><strong>Fecha:</strong> ${solicitud.fecha}</p>
+                    <p><strong>Entrada:</strong> ${solicitud.horaEntrada}</p>
+                    <p><strong>Salida:</strong> ${solicitud.horaSalida}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Recursos Arduino</h3>
+                    ${partesHTML}
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Propósito</h3>
+                    <p>${solicitud.proposito}</p>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Integrantes del Grupo</h3>
+                    <ul>
+                        ${solicitud.integrantes.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="detalle-section">
+                    <h3>Estado</h3>
+                    <p><strong>Estado Actual:</strong> <span class="status-badge status-${solicitud.estado.toLowerCase()}">${solicitud.estado}</span></p>
+                    ${solicitud.respuestaAdmin ? `<p><strong>Respuesta:</strong> ${solicitud.respuestaAdmin}</p>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('detallesArduinoModal').style.display = 'block';
+        };
+
+        // Abrir modal aprobar Arduino
+        window.abrirAprobarArduino = (id) => {
+            selectedSolicitudArduinoId = id;
+            document.getElementById('aprobarArduinoModal').style.display = 'block';
+        };
+
+        // Abrir modal rechazar Arduino
+        window.abrirRechazarArduino = (id) => {
+            selectedSolicitudArduinoId = id;
+            document.getElementById('rechazarArduinoModal').style.display = 'block';
+        };
+
+        // Aprobar Arduino
+        document.getElementById('aprobarArduinoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lugar = document.getElementById('lugarAsignadoArduino').value;
+            const notas = document.getElementById('notasAprobacionArduino').value;
+            
+            const respuesta = `Solicitud APROBADA. Lugar de retiro: ${lugar}. ${notas ? 'Notas: ' + notas : ''}`;
+            
+            try {
+                await updateDoc(doc(db, 'solicitudes_arduino', selectedSolicitudArduinoId), {
+                    estado: 'ACEPTADO',
+                    respuestaAdmin: respuesta,
+                    fechaRespuesta: new Date().toISOString()
+                });
+                
+                alert('✅ Solicitud Arduino aprobada exitosamente');
+                document.getElementById('aprobarArduinoModal').style.display = 'none';
+                document.getElementById('aprobarArduinoForm').reset();
+                loadSolicitudesArduino();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        });
+
+        // Rechazar Arduino
+        document.getElementById('rechazarArduinoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const motivo = document.getElementById('motivoRechazoArduino').value;
+            
+            try {
+                await updateDoc(doc(db, 'solicitudes_arduino', selectedSolicitudArduinoId), {
+                    estado: 'RECHAZADO',
+                    respuestaAdmin: `Solicitud RECHAZADA. Motivo: ${motivo}`,
+                    fechaRespuesta: new Date().toISOString()
+                });
+                
+                alert('✅ Solicitud Arduino rechazada');
+                document.getElementById('rechazarArduinoModal').style.display = 'none';
+                document.getElementById('rechazarArduinoForm').reset();
+                loadSolicitudesArduino();
             } catch (error) {
                 alert('❌ Error: ' + error.message);
             }
