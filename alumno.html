@@ -500,14 +500,14 @@ Kit Arduino Completo incluye:
                     setMinDateTimeArduino();
                 }
             } else {
-                window.location.href = 'index.html';
+                window.location.href = 'login_register.html';
             }
         });
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await signOut(auth);
-            window.location.href = 'index.html';
+            window.location.href = 'login_register.html';
         });
 
         // Tabs

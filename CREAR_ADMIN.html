@@ -94,7 +94,7 @@
         <div class="info-box">
             <h3>📋 Credenciales del Administrador:</h3>
             <p><strong>Email:</strong> admin@gmail.com</p>
-            <p><strong>Contraseña:</strong> 12345</p>
+            <p><strong>Contraseña:</strong> 123456</p>
         </div>
 
         <div class="warning-box">
@@ -119,11 +119,11 @@
             <h3>✅ ¡Cuenta creada exitosamente!</h3>
             <p>Ahora puedes iniciar sesión en el sistema con:</p>
             <p><strong>Email:</strong> admin@gmail.com</p>
-            <p><strong>Contraseña:</strong> 12345</p>
+            <p><strong>Contraseña:</strong> 123456</p>
         </div>
 
         <div class="link">
-            <a href="index.html">← Volver al Login</a>
+            <a href="login_register.html">← Volver al Login</a>
         </div>
     </div>
 
@@ -171,7 +171,7 @@
                 
                 // Paso 1: Crear usuario en Firebase Auth
                 log('Paso 1: Creando usuario en Firebase Authentication...', 'info');
-                const userCredential = await createUserWithEmailAndPassword(auth, 'admin@gmail.com', '12345');
+                const userCredential = await createUserWithEmailAndPassword(auth, 'admin@gmail.com', '123456');
                 const user = userCredential.user;
                 log('✅ Usuario creado exitosamente en Authentication', 'success');
                 log('UID: ' + user.uid, 'info');
@@ -217,7 +217,7 @@
                     log('ℹ️ La cuenta de administrador YA EXISTE', 'info');
                     log('Puedes iniciar sesión directamente con:', 'info');
                     log('  Email: admin@gmail.com', 'info');
-                    log('  Contraseña: 12345', 'info');
+                    log('  Contraseña: 123456', 'info');
                     btn.textContent = 'La cuenta ya existe';
                 } else {
                     btn.textContent = 'Error al crear cuenta';
@@ -232,7 +232,7 @@
 
             try {
                 // Intentar iniciar sesión
-                const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', '12345');
+                const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', '123456');
                 const user = userCredential.user;
                 
                 log('✅ La cuenta de administrador EXISTE', 'success');

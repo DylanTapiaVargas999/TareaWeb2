@@ -5,258 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Préstamo de Servidores</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .loading-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .loading-container p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="auth-container">
-            <div class="logo">
-                <h1>📡 Sistema de Préstamo</h1>
-                <p>Gestión de Servidores Académicos</p>
-            </div>
-
-            <!-- Login Form -->
-            <div class="auth-form" id="loginForm">
-                <h2>Iniciar Sesión</h2>
-                <form id="loginFormElement">
-                    <div class="form-group">
-                        <label for="loginEmail">Correo</label>
-                        <input type="text" id="loginEmail" placeholder="Correo institucional" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Ingresar</button>
-                    <p class="switch-form">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a></p>
-                </form>
-            </div>
-
-            <!-- Register Form -->
-            <div class="auth-form hidden" id="registerForm">
-                <h2>Crear Cuenta</h2>
-                <form id="registerFormElement">
-                    <div class="form-group">
-                        <label for="registerCodigo">Código del Alumno *</label>
-                        <input type="text" id="registerCodigo" placeholder="Ej: 2021001234" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerNombre">Nombre Completo *</label>
-                        <input type="text" id="registerNombre" placeholder="Tu nombre completo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerEmail">Correo Institucional *</label>
-                        <input type="email" id="registerEmail" placeholder="alumno@institucion.edu" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPassword">Contraseña *</label>
-                        <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPasswordConfirm">Confirmar Contraseña *</label>
-                        <input type="password" id="registerPasswordConfirm" placeholder="Repite tu contraseña" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Registrarse</button>
-                    <p class="switch-form">¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a></p>
-                </form>
-            </div>
-
-            <!-- Nota: Admin usa el mismo formulario de login -->
-        </div>
+    <div class="loading-container">
+        <h1>📡 Sistema de Préstamo</h1>
+        <p>Cargando...</p>
+        <div class="spinner"></div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
-            authDomain: "tareaweb2-59553.firebaseapp.com",
-            projectId: "tareaweb2-59553",
-            storageBucket: "tareaweb2-59553.firebasestorage.app",
-            messagingSenderId: "353313714839",
-            appId: "1:353313714839:web:685bfa9931e3096364efd2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Flag para evitar redirección durante el registro
-        let isRegistering = false;
-
-        // Check if already logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user && !isRegistering) {
-                console.log('Usuario ya autenticado, redirigiendo a alumno.html');
-                window.location.href = 'alumno.html';
-            }
-        });
-
-        // Switch between forms
-        document.getElementById('showRegister').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        });
-
-        document.getElementById('showLogin').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-        });
-
-        // Login
-        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                console.log('Iniciando sesión con:', email);
-                
-                // Verificar si es el admin
-                const isAdmin = email === 'admin@gmail.com' && password === '123456';
-                
-                if (isAdmin) {
-                    console.log('Detectado login de administrador');
-                    // Login como admin
-                    await signInWithEmailAndPassword(auth, email, password);
-                    console.log('✅ Admin autenticado exitosamente');
-                    alert('✅ Bienvenido Administrador');
-                    window.location.href = 'admin.html';
-                } else {
-                    console.log('Detectado login de alumno');
-                    // If email doesn't contain @, assume it's a codigo and append domain
-                    const loginEmail = email.includes('@') ? email : `${email}@alumno.local`;
-                    await signInWithEmailAndPassword(auth, loginEmail, password);
-                    console.log('✅ Alumno autenticado exitosamente');
-                    alert('✅ Inicio de sesión exitoso');
-                    window.location.href = 'alumno.html';
-                }
-            } catch (error) {
-                console.error('❌ Error en login:', error);
-                alert('❌ Error: ' + error.message);
-            }
-        });
-
-        // Register
-        document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Activar flag para prevenir redirección automática
-            isRegistering = true;
-            
-            // Deshabilitar botón para evitar envíos duplicados
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Registrando...';
-
-            try {
-                const codigo = document.getElementById('registerCodigo').value.trim();
-                const nombre = document.getElementById('registerNombre').value.trim();
-                const email = document.getElementById('registerEmail').value.trim();
-                const password = document.getElementById('registerPassword').value;
-                const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-
-                // Validaciones
-                if (password !== passwordConfirm) {
-                    alert('❌ Las contraseñas no coinciden');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                    return;
-                }
-
-                if (password.length < 6) {
-                    alert('❌ La contraseña debe tener al menos 6 caracteres');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                    return;
-                }
-
-                console.log('📝 Iniciando registro de usuario...');
-                console.log('Código:', codigo);
-                console.log('Nombre:', nombre);
-                console.log('Email:', email);
-
-                // Paso 1: Crear usuario en Firebase Auth
-                console.log('Paso 1: Creando usuario en Firebase Auth...');
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log('✅ Usuario creado en Auth. UID:', user.uid);
-
-                // Paso 2: Guardar datos adicionales en Firestore
-                console.log('Paso 2: Guardando datos en Firestore colección "alumnos"...');
-                const alumnoData = {
-                    codigo: codigo,
-                    nombre: nombre,
-                    email: email,
-                    rol: 'alumno',
-                    fechaRegistro: new Date().toISOString(),
-                    timestamp: Date.now()
-                };
-                
-                console.log('Datos a guardar:', alumnoData);
-                
-                // Intentar guardar en Firestore con retry
-                try {
-                    const docRef = doc(db, 'alumnos', user.uid);
-                    console.log('Referencia del documento:', docRef.path);
-                    await setDoc(docRef, alumnoData);
-                    console.log('✅ Datos guardados en Firestore exitosamente');
-                    
-                    // Verificar que se guardó correctamente
-                    const savedDoc = await getDoc(docRef);
-                    if (savedDoc.exists()) {
-                        console.log('✅ Verificación: Documento existe en Firestore:', savedDoc.data());
-                    } else {
-                        console.warn('⚠️ Advertencia: Documento no encontrado después de guardar');
-                    }
-                } catch (firestoreError) {
-                    console.error('❌ Error específico de Firestore:', firestoreError);
-                    throw firestoreError;
-                }
-
-                console.log('✅ Proceso de registro completado exitosamente');
-                alert('✅ Registro exitoso. Bienvenido!');
-                
-                // Desactivar flag y redirigir
-                isRegistering = false;
-                window.location.href = 'alumno.html';
-                
-            } catch (error) {
-                // Desactivar flag en caso de error
-                isRegistering = false;
-                
-                console.error('❌ Error detallado:', error);
-                console.error('Código de error:', error.code);
-                console.error('Mensaje:', error.message);
-                
-                let errorMsg = 'Error al registrar: ';
-                
-                // Mensajes de error más específicos
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg += 'Este correo ya está registrado';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg += 'Correo electrónico inválido';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg += 'Contraseña muy débil';
-                } else if (error.code === 'permission-denied') {
-                    errorMsg += 'Sin permisos para guardar datos. Revisa las reglas de Firestore';
-                } else {
-                    errorMsg += error.message;
-                }
-                
-                alert('❌ ' + errorMsg);
-                
-                // Rehabilitar botón
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-        });
+    <script>
+        // Redirección automática a login_register.html
+        window.location.href = 'login_register.html';
     </script>
 </body>
 </html>

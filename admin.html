@@ -337,7 +337,7 @@
             if (!user) {
                 console.log('No hay usuario autenticado, redirigiendo a login...');
                 alert('❌ Debes iniciar sesión como administrador');
-                window.location.href = 'index.html';
+                window.location.href = 'login_register.html';
                 return;
             }
             
@@ -353,14 +353,14 @@
                 console.log('❌ Usuario no es administrador:', user.email);
                 alert('❌ Acceso denegado. Solo administradores pueden acceder a este panel.');
                 await signOut(auth);
-                window.location.href = 'index.html';
+                window.location.href = 'login_register.html';
             }
         });
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await signOut(auth);
-            window.location.href = 'index.html';
+            window.location.href = 'login_register.html';
         });
 
         // Navegación entre secciones (Servidores / Arduino)
