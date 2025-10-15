@@ -163,21 +163,35 @@
                 const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
 
                 // Validaciones
+                
+                // Validación 1: Prevenir registro con email de administrador
+                if (email.toLowerCase() === 'admin@gmail.com') {
+                    alert('❌ No se puede registrar con el email del administrador. Use credenciales de alumno.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    isRegistering = false;
+                    return;
+                }
+                
+                // Validación 2: Contraseñas coinciden
                 if (password !== passwordConfirm) {
                     alert('❌ Las contraseñas no coinciden');
                     submitBtn.disabled = false;
                     submitBtn.textContent = originalText;
+                    isRegistering = false;
                     return;
                 }
 
+                // Validación 3: Longitud mínima de contraseña
                 if (password.length < 6) {
                     alert('❌ La contraseña debe tener al menos 6 caracteres');
                     submitBtn.disabled = false;
                     submitBtn.textContent = originalText;
+                    isRegistering = false;
                     return;
                 }
 
-                console.log('📝 Iniciando registro de usuario...');
+                console.log('📝 Iniciando registro de usuario ALUMNO...');
                 console.log('Código:', codigo);
                 console.log('Nombre:', nombre);
                 console.log('Email:', email);
@@ -190,14 +204,19 @@
 
                 // Paso 2: Guardar datos adicionales en Firestore
                 console.log('Paso 2: Guardando datos en Firestore colección "alumnos"...');
+                
+                // IMPORTANTE: Todos los usuarios registrados aquí tienen rol de "alumno" por defecto
+                // Solo el admin (admin@gmail.com) tiene rol diferente y debe crearse por otro medio
                 const alumnoData = {
                     codigo: codigo,
                     nombre: nombre,
                     email: email,
-                    rol: 'alumno',
+                    rol: 'alumno', // ⚠️ ROL FIJO: Todos los registros desde aquí son ALUMNOS
                     fechaRegistro: new Date().toISOString(),
                     timestamp: Date.now()
                 };
+                
+                console.log('📝 Asignando rol de ALUMNO al usuario:', email);
                 
                 console.log('Datos a guardar:', alumnoData);
                 
