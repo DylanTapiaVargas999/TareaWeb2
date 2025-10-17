@@ -87,11 +87,48 @@
         // Flag para evitar redirección durante el registro
         let isRegistering = false;
 
-        // Check if already logged in
-        onAuthStateChanged(auth, (user) => {
+        // Helper: obtener rol de usuario desde Firestore
+        async function getUserRole(uid) {
+            try {
+                // Primero revisar colección 'administradores'
+                const adminDoc = await getDoc(doc(db, 'administradores', uid));
+                if (adminDoc.exists()) {
+                    const data = adminDoc.data();
+                    if (data && data.rol) return data.rol;
+                    return 'admin';
+                }
+
+                // Luego revisar colección 'alumnos'
+                const alumnoDoc = await getDoc(doc(db, 'alumnos', uid));
+                if (alumnoDoc.exists()) {
+                    const data = alumnoDoc.data();
+                    if (data && data.rol) return data.rol;
+                    return 'alumno';
+                }
+
+                // Si no hay documento en ninguna colección, devolver null
+                return null;
+            } catch (err) {
+                console.error('Error al obtener rol desde Firestore:', err);
+                return null;
+            }
+        }
+
+        // Check if already logged in and redirect based on role
+        onAuthStateChanged(auth, async (user) => {
             if (user && !isRegistering) {
-                console.log('Usuario ya autenticado, redirigiendo a alumno.html');
-                window.location.href = 'alumno.html';
+                console.log('Usuario ya autenticado, comprobando rol...');
+                const role = await getUserRole(user.uid);
+                console.log('Rol detectado:', role);
+                if (role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (role === 'alumno') {
+                    window.location.href = 'alumno.html';
+                } else {
+                    // Si no se detecta rol, por seguridad cerrar sesión y mostrar mensaje
+                    alert('No se encontró información de rol para este usuario. Contacte al administrador.');
+                    await auth.signOut();
+                }
             }
         });
 
@@ -111,34 +148,44 @@
         // Login
         document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
+            const rawEmail = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
             try {
-                console.log('Iniciando sesión con:', email);
-                
-                // Verificar si es el admin
-                const isAdmin = email === 'admin@gmail.com' && password === '123456';
-                
-                if (isAdmin) {
-                    console.log('Detectado login de administrador');
-                    // Login como admin
-                    await signInWithEmailAndPassword(auth, email, password);
-                    console.log('✅ Admin autenticado exitosamente');
+                console.log('Iniciando sesión con:', rawEmail);
+
+                // Si el usuario ingresó un código (sin @), añadir dominio temporal
+                const email = rawEmail.includes('@') ? rawEmail : `${rawEmail}@alumno.local`;
+
+                // Intentar autenticación
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log('✅ Usuario autenticado UID:', user.uid);
+
+                // Obtener rol desde Firestore
+                const role = await getUserRole(user.uid);
+                console.log('Rol obtenido:', role);
+
+                if (role === 'admin') {
                     alert('✅ Bienvenido Administrador');
                     window.location.href = 'admin.html';
-                } else {
-                    console.log('Detectado login de alumno');
-                    // If email doesn't contain @, assume it's a codigo and append domain
-                    const loginEmail = email.includes('@') ? email : `${email}@alumno.local`;
-                    await signInWithEmailAndPassword(auth, loginEmail, password);
-                    console.log('✅ Alumno autenticado exitosamente');
+                } else if (role === 'alumno') {
                     alert('✅ Inicio de sesión exitoso');
                     window.location.href = 'alumno.html';
+                } else {
+                    // No se encontró rol: avisar y cerrar sesión
+                    alert('No se encontró información de rol para este usuario. Contacte al administrador.');
+                    await auth.signOut();
                 }
+
             } catch (error) {
                 console.error('❌ Error en login:', error);
-                alert('❌ Error: ' + error.message);
+                // Mensajes más amigables
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    alert('Credenciales incorrectas. Verifica tu correo y contraseña.');
+                } else {
+                    alert('❌ Error: ' + (error.message || error));
+                }
             }
         });
 

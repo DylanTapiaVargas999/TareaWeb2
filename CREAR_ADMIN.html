@@ -91,10 +91,10 @@
     <div class="container">
         <h1>🔐 Crear Cuenta de Administrador</h1>
         
-        <div class="info-box">
+        <div class="info-box" id="credsBox">
             <h3>📋 Credenciales del Administrador:</h3>
-            <p><strong>Email:</strong> admin@gmail.com</p>
-            <p><strong>Contraseña:</strong> 123456</p>
+            <p id="credEmail"><strong>Email:</strong> admin@gmail.com</p>
+            <p id="credPass"><strong>Contraseña:</strong> 123456</p>
         </div>
 
         <div class="warning-box">
@@ -104,7 +104,7 @@
         </div>
 
         <button id="createAdminBtn" onclick="createAdminAccount()">
-            Crear Cuenta de Administrador
+            Crear Cuenta de Administrador (admin1)
         </button>
 
         <button onclick="checkIfExists()" style="background: #28a745;">
@@ -118,8 +118,8 @@
         <div class="success-box" id="successBox">
             <h3>✅ ¡Cuenta creada exitosamente!</h3>
             <p>Ahora puedes iniciar sesión en el sistema con:</p>
-            <p><strong>Email:</strong> admin@gmail.com</p>
-            <p><strong>Contraseña:</strong> 123456</p>
+            <p id="successEmail"><strong>Email:</strong> admin@gmail.com</p>
+            <p id="successPass"><strong>Contraseña:</strong> 123456</p>
         </div>
 
         <div class="link">
@@ -166,12 +166,21 @@
             btn.textContent = 'Creando cuenta...';
 
             try {
-                log('🔐 Iniciando creación de cuenta de administrador...', 'info');
-                log('Email: admin@gmail.com', 'info');
-                
+                // Leer estado local para saber cuál crear
+                const createdAdmins = JSON.parse(localStorage.getItem('createdAdmins') || '[]');
+                const toCreate = createdAdmins.includes('admin1') ? 'admin2' : 'admin1';
+                const email = toCreate === 'admin1' ? 'admin1@gmail.com' : 'admin2@gmail.com';
+                const password = '123456';
+
+                document.getElementById('credEmail').innerHTML = '<strong>Email:</strong> ' + email;
+                document.getElementById('credPass').innerHTML = '<strong>Contraseña:</strong> ' + password;
+
+                log('🔐 Iniciando creación de ' + toCreate + '...', 'info');
+                log('Email: ' + email, 'info');
+
                 // Paso 1: Crear usuario en Firebase Auth
                 log('Paso 1: Creando usuario en Firebase Authentication...', 'info');
-                const userCredential = await createUserWithEmailAndPassword(auth, 'admin@gmail.com', '123456');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 log('✅ Usuario creado exitosamente en Authentication', 'success');
                 log('UID: ' + user.uid, 'info');
@@ -179,11 +188,12 @@
                 // Paso 2: Guardar datos de admin en Firestore
                 log('Paso 2: Guardando datos en Firestore...', 'info');
                 const adminData = {
-                    email: 'admin@gmail.com',
+                    email: email,
                     rol: 'admin',
-                    nombre: 'Administrador del Sistema',
+                    nombre: toCreate === 'admin1' ? 'Administrador 1' : 'Administrador 2',
                     fechaCreacion: new Date().toISOString(),
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    tag: toCreate
                 };
 
                 await setDoc(doc(db, 'administradores', user.uid), adminData);
@@ -197,11 +207,13 @@
                 }
 
                 log('════════════════════════════════════════', 'success');
-                log('✅✅✅ CUENTA DE ADMIN CREADA EXITOSAMENTE ✅✅✅', 'success');
+                log('✅✅✅ ' + toCreate.toUpperCase() + ' CREADA EXITOSAMENTE ✅✅✅', 'success');
                 log('════════════════════════════════════════', 'success');
 
                 document.getElementById('successBox').style.display = 'block';
-                btn.textContent = '✅ Cuenta Creada';
+                document.getElementById('successEmail').innerHTML = '<strong>Email:</strong> ' + email;
+                document.getElementById('successPass').innerHTML = '<strong>Contraseña:</strong> ' + password;
+                btn.textContent = '✅ ' + toCreate + ' Creada';
 
                 // Cerrar sesión para que pueda hacer login
                 setTimeout(async () => {
@@ -209,16 +221,47 @@
                     log('Sesión cerrada. Ahora puedes iniciar sesión.', 'info');
                 }, 2000);
 
+                // Guardar estado en localStorage
+                createdAdmins.push(toCreate);
+                localStorage.setItem('createdAdmins', JSON.stringify(createdAdmins));
+
+                // Actualizar texto del botón o desactivar si ambos creados
+                if (createdAdmins.includes('admin1') && createdAdmins.includes('admin2')) {
+                    btn.disabled = true;
+                    btn.textContent = 'Ambos administradores creados';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Crear Cuenta de Administrador (' + (createdAdmins.includes('admin1') ? 'admin2' : 'admin1') + ')';
+                }
+
             } catch (error) {
                 log('❌ ERROR: ' + error.code, 'error');
                 log('Mensaje: ' + error.message, 'error');
 
+                const createdAdmins = JSON.parse(localStorage.getItem('createdAdmins') || '[]');
+                const toCreate = createdAdmins.includes('admin1') ? 'admin2' : 'admin1';
+                const email = toCreate === 'admin1' ? 'admin1@gmail.com' : 'admin2@gmail.com';
+                const password = '123456';
+
                 if (error.code === 'auth/email-already-in-use') {
-                    log('ℹ️ La cuenta de administrador YA EXISTE', 'info');
+                    log('ℹ️ La cuenta de ' + toCreate + ' YA EXISTE', 'info');
                     log('Puedes iniciar sesión directamente con:', 'info');
-                    log('  Email: admin@gmail.com', 'info');
-                    log('  Contraseña: 123456', 'info');
+                    log('  Email: ' + email, 'info');
+                    log('  Contraseña: ' + password, 'info');
                     btn.textContent = 'La cuenta ya existe';
+
+                    if (!createdAdmins.includes(toCreate)) {
+                        createdAdmins.push(toCreate);
+                        localStorage.setItem('createdAdmins', JSON.stringify(createdAdmins));
+                    }
+
+                    if (createdAdmins.includes('admin1') && createdAdmins.includes('admin2')) {
+                        btn.disabled = true;
+                        btn.textContent = 'Ambos administradores creados';
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'Crear Cuenta de Administrador (' + (createdAdmins.includes('admin1') ? 'admin2' : 'admin1') + ')';
+                    }
                 } else {
                     btn.textContent = 'Error al crear cuenta';
                     btn.disabled = false;
@@ -228,36 +271,44 @@
 
         window.checkIfExists = async function() {
             clearLog();
-            log('🔍 Verificando si la cuenta de admin existe...', 'info');
+            log('🔍 Verificando si admin1 y admin2 existen...', 'info');
 
-            try {
-                // Intentar iniciar sesión
-                const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', '123456');
-                const user = userCredential.user;
-                
-                log('✅ La cuenta de administrador EXISTE', 'success');
-                log('UID: ' + user.uid, 'info');
-                log('Email: ' + user.email, 'info');
+            const results = [];
+            const admins = [
+                { tag: 'admin1', email: 'admin1@gmail.com', pass: '123456' },
+                { tag: 'admin2', email: 'admin2@gmail.com', pass: '123456' }
+            ];
 
-                // Verificar en Firestore
-                const docSnap = await getDoc(doc(db, 'administradores', user.uid));
-                if (docSnap.exists()) {
-                    log('✅ Datos encontrados en Firestore:', 'success');
-                    log(JSON.stringify(docSnap.data(), null, 2), 'info');
-                } else {
-                    log('⚠️ Usuario existe en Auth pero NO en Firestore', 'error');
+            for (const a of admins) {
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, a.email, a.pass);
+                    const user = userCredential.user;
+                    log('✅ ' + a.tag + ' existe. UID: ' + user.uid + ' Email: ' + user.email, 'success');
+
+                    const docSnap = await getDoc(doc(db, 'administradores', user.uid));
+                    if (docSnap.exists()) {
+                        log('   ✅ Datos en Firestore: ' + JSON.stringify(docSnap.data(), null, 2), 'info');
+                    } else {
+                        log('   ⚠️ Usuario existe en Auth pero NO en Firestore', 'error');
+                    }
+
+                    await signOut(auth);
+                    results.push(a.tag);
+                } catch (error) {
+                    log('❌ ' + a.tag + ' NO existe (' + (error.code || error.message) + ')', 'error');
                 }
+            }
 
-                // Cerrar sesión
-                await signOut(auth);
-                log('Sesión cerrada.', 'info');
+            // Actualizar localStorage según resultados
+            if (results.length > 0) {
+                const state = JSON.parse(localStorage.getItem('createdAdmins') || '[]');
+                for (const r of results) if (!state.includes(r)) state.push(r);
+                localStorage.setItem('createdAdmins', JSON.stringify(state));
 
-            } catch (error) {
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    log('❌ La cuenta de administrador NO EXISTE', 'error');
-                    log('Presiona el botón "Crear Cuenta de Administrador" para crearla.', 'info');
-                } else {
-                    log('❌ Error: ' + error.message, 'error');
+                if (state.includes('admin1') && state.includes('admin2')) {
+                    const btn = document.getElementById('createAdminBtn');
+                    btn.disabled = true;
+                    btn.textContent = 'Ambos administradores creados';
                 }
             }
         };

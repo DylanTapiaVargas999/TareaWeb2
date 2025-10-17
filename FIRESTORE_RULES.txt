@@ -17,44 +17,69 @@ SOLUCIÓN: CONFIGURAR REGLAS EN FIREBASE CONSOLE
 5. Reemplaza las reglas actuales con estas:
 
 ───────────────────────────────────────────────────────────────
-REGLAS PARA DESARROLLO (PERMISIVAS):
+REGLAS PARA DESARROLLO (ROL-BASED):
 ───────────────────────────────────────────────────────────────
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper: comprobar si el usuario autenticado tiene rol 'admin'
+    // Esta implementación comprueba el documento en la colección
+    // 'administradores/{uid}' y revisa el campo 'rol'.
+    // Alternativa (más segura): usar custom claims en el token de Auth
+    // y comprobar `request.auth.token.role == 'admin'`.
+    function isAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/administradores/$(request.auth.uid)).exists()
+        && get(/databases/$(database)/documents/administradores/$(request.auth.uid)).data.rol == 'admin';
+    }
+
     // Colección de alumnos
     match /alumnos/{alumnoId} {
       // Permitir creación durante el registro (cuando el UID coincide)
-      allow create: if request.auth != null 
+      allow create: if request.auth != null
                     && request.auth.uid == alumnoId;
-      
+
       // Permitir lectura de su propio documento
-      allow read: if request.auth != null 
+      allow read: if request.auth != null
                   && request.auth.uid == alumnoId;
-      
+
       // Permitir actualización de su propio documento
-      allow update: if request.auth != null 
+      allow update: if request.auth != null
                     && request.auth.uid == alumnoId;
-      
-      // No permitir eliminación (o solo a admins)
-      allow delete: if false;
+
+      // Permitir eliminación solo a admins
+      allow delete: if isAdmin();
     }
-    
+
+    // Colección de administradores: acceso restringido a admins
+    match /administradores/{adminId} {
+      // Solo administradores pueden leer/crear/actualizar/eliminar documentos en esta colección
+      allow read, write: if isAdmin();
+    }
+
     // Colección de solicitudes
     match /solicitudes/{solicitudId} {
       // Permitir lectura a usuarios autenticados
       allow read: if request.auth != null;
-      
-      // Permitir creación a usuarios autenticados
-      allow create: if request.auth != null 
+
+      // Permitir creación a usuarios autenticados y que el uidAlumno coincida
+      allow create: if request.auth != null
                     && request.resource.data.uidAlumno == request.auth.uid;
-      
+
       // Permitir actualización solo si eres el dueño o admin
-      allow update: if request.auth != null;
-      
+      allow update: if request.auth != null
+                    && (resource.data.uidAlumno == request.auth.uid || isAdmin());
+
       // Permitir eliminación solo a admins
-      allow delete: if request.auth != null;
+      allow delete: if isAdmin();
+    }
+
+    // Por defecto denegar el resto
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
     }
   }
 }

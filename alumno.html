@@ -112,10 +112,7 @@
                     <div class="form-section">
                         <h3>Integrantes del Grupo</h3>
                         <div id="integrantesContainer">
-                            <div class="integrante-item">
-                                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input">
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
-                            </div>
+                            <!-- El primer integrante por defecto será el solicitante; se rellenará en JS -->
                         </div>
                         <button type="button" id="addIntegrante" class="btn btn-secondary">+ Agregar Integrante</button>
                     </div>
@@ -335,10 +332,7 @@ Kit Arduino Completo incluye:
                     <div class="form-section">
                         <h3>Integrantes del Grupo</h3>
                         <div id="integrantesContainerArduino">
-                            <div class="integrante-item">
-                                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input-arduino">
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
-                            </div>
+                            <!-- El primer integrante por defecto será el solicitante; se rellenará en JS -->
                         </div>
                         <button type="button" id="addIntegranteArduino" class="btn btn-secondary">+ Agregar Integrante</button>
                     </div>
@@ -494,6 +488,8 @@ Kit Arduino Completo incluye:
                     // También llenar los campos del formulario Arduino
                     document.getElementById('nombreResponsableArduino').value = alumnoData.nombre;
                     document.getElementById('codigoResponsableArduino').value = alumnoData.codigo;
+                    // Rellenar el primer integrante en ambos formularios (solicitante)
+                    renderDefaultIntegrante(alumnoData.nombre, alumnoData.codigo);
                     loadSolicitudes();
                     // Establecer validaciones de fecha y hora
                     setMinDateTime();
@@ -520,29 +516,52 @@ Kit Arduino Completo incluye:
             });
         });
 
-        // Add integrante
+        // Add integrante (requiere nombre y codigo)
         document.getElementById('addIntegrante').addEventListener('click', () => {
             const container = document.getElementById('integrantesContainer');
             const div = document.createElement('div');
             div.className = 'integrante-item';
             div.innerHTML = `
-                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input">
+                <input type="text" placeholder="Nombre completo del integrante" class="integrante-nombre" required pattern="[A-Za-z ÑñáéíóúÁÉÍÓÚ]+" title="Solo letras" oninput="this.value = this.value.replace(/[^A-Za-z ÑñáéíóúÁÉÍÓÚ]/g,'')">
+                <input type="text" placeholder="Código del integrante" class="integrante-codigo" required style="width:120px; margin-left:8px;" pattern="\\d+" title="Solo números" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
                 <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
             `;
             container.appendChild(div);
         });
 
-        // Add integrante Arduino
+        // Add integrante Arduino (requiere nombre y codigo)
         document.getElementById('addIntegranteArduino').addEventListener('click', () => {
             const container = document.getElementById('integrantesContainerArduino');
             const div = document.createElement('div');
             div.className = 'integrante-item';
             div.innerHTML = `
-                <input type="text" placeholder="Nombre completo del integrante" class="integrante-input-arduino">
+                <input type="text" placeholder="Nombre completo del integrante" class="integrante-nombre-arduino" required pattern="[A-Za-z ÑñáéíóúÁÉÍÓÚ]+" title="Solo letras" oninput="this.value = this.value.replace(/[^A-Za-z ÑñáéíóúÁÉÍÓÚ]/g,'')">
+                <input type="text" placeholder="Código del integrante" class="integrante-codigo-arduino" required style="width:120px; margin-left:8px;" pattern="\\d+" title="Solo números" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
                 <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
             `;
             container.appendChild(div);
         });
+
+        // Render default integrante (solicitante) en ambos formularios
+        function renderDefaultIntegrante(nombre, codigo) {
+            const container = document.getElementById('integrantesContainer');
+            const div = document.createElement('div');
+            div.className = 'integrante-item';
+            div.innerHTML = `
+                <input type="text" value="${nombre}" class="integrante-nombre" readonly>
+                <input type="text" value="${codigo}" class="integrante-codigo" readonly style="width:120px; margin-left:8px;">
+            `;
+            container.appendChild(div);
+
+            const containerA = document.getElementById('integrantesContainerArduino');
+            const divA = document.createElement('div');
+            divA.className = 'integrante-item';
+            divA.innerHTML = `
+                <input type="text" value="${nombre}" class="integrante-nombre-arduino" readonly>
+                <input type="text" value="${codigo}" class="integrante-codigo-arduino" readonly style="width:120px; margin-left:8px;">
+            `;
+            containerA.appendChild(divA);
+        }
 
         // Manejador del tipo de alquiler Arduino
         document.getElementById('tipoAlquiler').addEventListener('change', function() {
@@ -640,9 +659,34 @@ Kit Arduino Completo incluye:
             submitBtn.textContent = 'Enviando...';
 
             try {
-                const integrantes = Array.from(document.querySelectorAll('.integrante-input'))
-                    .map(input => input.value.trim())
-                    .filter(val => val !== '');
+                // Recopilar integrantes como objetos { nombre, codigo }
+                const integranteItems = Array.from(document.querySelectorAll('#integrantesContainer .integrante-item'));
+                const integrantes = integranteItems.map(item => {
+                    const nombreEl = item.querySelector('.integrante-nombre');
+                    const codigoEl = item.querySelector('.integrante-codigo');
+                    return {
+                        nombre: nombreEl ? nombreEl.value.trim() : '',
+                        codigo: codigoEl ? codigoEl.value.trim() : ''
+                    };
+                }).filter(i => i.nombre !== '' && i.codigo !== '');
+
+                // Validación: nombre solo letras, codigo solo números
+                const nombreRe = /^[A-Za-z ÑñáéíóúÁÉÍÓÚ]+$/;
+                const codigoRe = /^\d+$/;
+                for (const it of integrantes) {
+                    if (!nombreRe.test(it.nombre)) {
+                        alert('❌ El nombre de cada integrante solo debe contener letras. Revisa: ' + it.nombre);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                    if (!codigoRe.test(it.codigo)) {
+                        alert('❌ El código de cada integrante debe contener solo números. Revisa: ' + it.codigo);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                }
 
                 const accesorios = [];
                 if (document.getElementById('accMonitor').checked) accesorios.push('Monitor');
@@ -671,9 +715,9 @@ Kit Arduino Completo incluye:
                     tipoServidor: document.getElementById('tipoServidor').value,
                     caracteristicas: document.getElementById('caracteristicas').value,
                     
-                    // Logística
-                    accesorios: accesorios,
-                    integrantes: integrantes,
+                        // Logística
+                        accesorios: accesorios,
+                        integrantes: integrantes,
                     
                     // Estado
                     estado: 'PENDIENTE',
@@ -760,9 +804,34 @@ Kit Arduino Completo incluye:
             submitBtn.textContent = 'Enviando...';
 
             try {
-                const integrantes = Array.from(document.querySelectorAll('.integrante-input-arduino'))
-                    .map(input => input.value.trim())
-                    .filter(val => val !== '');
+                // Recopilar integrantes Arduino como objetos { nombre, codigo }
+                const integranteItemsA = Array.from(document.querySelectorAll('#integrantesContainerArduino .integrante-item'));
+                const integrantes = integranteItemsA.map(item => {
+                    const nombreEl = item.querySelector('.integrante-nombre-arduino');
+                    const codigoEl = item.querySelector('.integrante-codigo-arduino');
+                    return {
+                        nombre: nombreEl ? nombreEl.value.trim() : '',
+                        codigo: codigoEl ? codigoEl.value.trim() : ''
+                    };
+                }).filter(i => i.nombre !== '' && i.codigo !== '');
+
+                // Validación: nombre solo letras, codigo solo números (Arduino)
+                const nombreReA = /^[A-Za-z ÑñáéíóúÁÉÍÓÚ]+$/;
+                const codigoReA = /^\d+$/;
+                for (const it of integrantes) {
+                    if (!nombreReA.test(it.nombre)) {
+                        alert('❌ El nombre de cada integrante solo debe contener letras. Revisa: ' + it.nombre);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                    if (!codigoReA.test(it.codigo)) {
+                        alert('❌ El código de cada integrante debe contener solo números. Revisa: ' + it.codigo);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                }
 
                 const solicitud = {
                     // Identificación

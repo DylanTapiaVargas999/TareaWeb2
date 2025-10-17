@@ -163,13 +163,26 @@
 
             <!-- Gráfica de Arduino -->
             <div class="charts-grid">
-                <div class="chart-card">
-                    <h3>Tipo de Alquiler - Arduino</h3>
-                    <canvas id="arduinoChart"></canvas>
-                </div>
+                <!-- 'Tipo de Alquiler - Arduino' chart removed as requested -->
                 <div class="chart-card">
                     <h3>Componentes Más Solicitados</h3>
                     <canvas id="componentesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>📅 Calendario de Ocupación - Arduino</h3>
+                    <div id="calendarContainerArduino" class="calendar-container">
+                        <div class="calendar-header">
+                            <button id="prevMonthArduino" class="btn btn-sm btn-secondary">◀</button>
+                            <h4 id="currentMonthArduino"></h4>
+                            <button id="nextMonthArduino" class="btn btn-sm btn-secondary">▶</button>
+                        </div>
+                        <div class="calendar-legend">
+                            <span><span class="legend-dot available"></span> Disponible</span>
+                            <span><span class="legend-dot occupied"></span> Ocupado</span>
+                            <span><span class="legend-dot multiple"></span> Múltiples</span>
+                        </div>
+                        <div id="calendarGridArduino" class="calendar-grid"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -303,7 +316,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, query, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, query, getDocs, doc, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDDmyY3n9s1Wcyx0-0G3MCXc0zfRd47ge8",
@@ -319,40 +332,50 @@
         const db = getFirestore(app);
 
         let allSolicitudes = [];
+    let serverSolicitudes = []; 
         let currentFilter = 'TODAS';
         let selectedSolicitudId = null;
         let barChart = null;
         let currentCalendarDate = new Date();
+    let currentAdminName = null;
         
         // Variables para Arduino
-        let allSolicitudesArduino = [];
-        let currentFilterArduino = 'TODAS';
-        let selectedSolicitudArduinoId = null;
-        let arduinoChart = null;
-        let componentesChart = null;
+    let allSolicitudesArduino = [];
+    let currentFilterArduino = 'TODAS';
+    let selectedSolicitudArduinoId = null;
+    let componentesChart = null;
+    let currentCalendarDateArduino = new Date();
         let currentSection = 'servidores';
 
-        // Auth check - Verificar que es administrador
+        // Auth check - Verificar que es administrador mediante Firestore (rol)
         onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                console.log('No hay usuario autenticado, redirigiendo a login...');
-                alert('❌ Debes iniciar sesión como administrador');
-                window.location.href = 'login_register.html';
-                return;
-            }
             
+
             console.log('Usuario autenticado:', user.email);
-            
-            // Verificar si es admin
-            if (user.email === 'admin@gmail.com') {
-                console.log('✅ Acceso de administrador confirmado');
-                document.getElementById('adminName').textContent = 'Administrador';
-                loadSolicitudes();
-                loadSolicitudesArduino();
-            } else {
-                console.log('❌ Usuario no es administrador:', user.email);
-                alert('❌ Acceso denegado. Solo administradores pueden acceder a este panel.');
+
+            try {
+                const adminDocRef = doc(db, 'administradores', user.uid);
+                const adminSnap = await getDoc(adminDocRef);
+
+                if (adminSnap.exists() && adminSnap.data().rol === 'admin') {
+                    console.log('✅ Acceso de administrador confirmado (rol en Firestore)');
+                    const nombre = adminSnap.data().nombre || 'Administrador';
+                    currentAdminName = nombre;
+                    document.getElementById('adminName').textContent = nombre;
+                    loadSolicitudes();
+                    loadSolicitudesArduino();
+                } else {
+                    console.log('❌ Usuario no es administrador (documento/firestore):', user.email);
+                    alert('❌ Acceso denegado. Solo administradores pueden acceder a este panel.');
+                    await signOut(auth);
+                    currentAdminName = null;
+                    window.location.href = 'login_register.html';
+                }
+            } catch (err) {
+                console.error('Error verificando rol de admin:', err);
+                alert('❌ Error verificando permisos. Intenta iniciar sesión nuevamente.');
                 await signOut(auth);
+                currentAdminName = null;
                 window.location.href = 'login_register.html';
             }
         });
@@ -388,20 +411,24 @@
                 const q = query(collection(db, 'solicitudes'));
                 const querySnapshot = await getDocs(q);
                 
-                allSolicitudes = [];
+                // Guardamos exclusivamente los documentos de la colección 'solicitudes'
+                serverSolicitudes = [];
                 querySnapshot.forEach((doc) => {
-                    allSolicitudes.push({
+                    serverSolicitudes.push({
                         id: doc.id,
                         ...doc.data()
                     });
                 });
 
                 // Ordenar en el cliente
-                allSolicitudes.sort((a, b) => {
+                serverSolicitudes.sort((a, b) => {
                     const dateA = new Date(a.fechaSolicitud || 0);
                     const dateB = new Date(b.fechaSolicitud || 0);
                     return dateB - dateA; // Más reciente primero
                 });
+
+                // Mantener also allSolicitudes para compatibilidad (si se usa en otros lugares)
+                allSolicitudes = serverSolicitudes.slice();
 
                 updateStats();
                 updateCharts();
@@ -414,10 +441,10 @@
 
         // Update stats
         function updateStats() {
-            const total = allSolicitudes.length;
-            const pendientes = allSolicitudes.filter(s => s.estado === 'PENDIENTE').length;
-            const aprobadas = allSolicitudes.filter(s => s.estado === 'ACEPTADO').length;
-            const rechazadas = allSolicitudes.filter(s => s.estado === 'RECHAZADO').length;
+            const total = serverSolicitudes.length;
+            const pendientes = serverSolicitudes.filter(s => s.estado === 'PENDIENTE').length;
+            const aprobadas = serverSolicitudes.filter(s => s.estado === 'ACEPTADO').length;
+            const rechazadas = serverSolicitudes.filter(s => s.estado === 'RECHAZADO').length;
 
             document.getElementById('totalSolicitudes').textContent = total;
             document.getElementById('totalPendientes').textContent = pendientes;
@@ -432,7 +459,7 @@
 
             // Bar Chart - Demanda por servidor (todas las solicitudes)
             const servidores = {};
-            allSolicitudes.forEach(s => {
+            serverSolicitudes.forEach(s => {
                 servidores[s.servidor] = (servidores[s.servidor] || 0) + 1;
             });
 
@@ -501,9 +528,10 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                // Buscar solicitudes aceptadas para esta fecha
-                const solicitudesDelDia = allSolicitudes.filter(s => 
-                    s.estado === 'ACEPTADO' && s.fecha === dateStr
+                // Buscar solicitudes aceptadas para esta fecha (solo solicitudes de SERVIDORES)
+                // Asegurarse que tengan el campo 'servidor' definido para excluir arduino
+                const solicitudesDelDia = serverSolicitudes.filter(s =>
+                    s.estado === 'ACEPTADO' && s.fecha === dateStr && s.servidor
                 );
 
                 const dayCell = document.createElement('div');
@@ -529,11 +557,11 @@
                     ).join('\n');
                     dayCell.title = `${solicitudesDelDia.length} servidor(es) ocupado(s):\n${servidoresInfo}`;
                     
-                    // Click para mostrar detalles
-                    dayCell.style.cursor = 'pointer';
-                    dayCell.addEventListener('click', () => {
-                        mostrarDetallesDia(dateStr, solicitudesDelDia);
-                    });
+                        // Click para mostrar detalles (usar solo solicitudes de servidores)
+                        dayCell.style.cursor = 'pointer';
+                        dayCell.addEventListener('click', () => {
+                            mostrarDetallesDia(dateStr, solicitudesDelDia);
+                        });
                 }
 
                 dayCell.innerHTML = `<span class="day-number">${day}</span>`;
@@ -548,12 +576,21 @@
         // Mostrar detalles de un día específico
         function mostrarDetallesDia(fecha, solicitudes) {
             const content = document.getElementById('detallesContent');
+            // Filtrar por servidor por si acaso
+            const serverOnly = (solicitudes || []).filter(s => s.servidor);
+
+            if (serverOnly.length === 0) {
+                content.innerHTML = `<h3>Solicitudes para ${fecha}</h3><p>No hay solicitudes de servidores para este día.</p>`;
+                document.getElementById('detallesModal').style.display = 'block';
+                return;
+            }
+
             content.innerHTML = `
                 <h3>Solicitudes para ${fecha}</h3>
-                ${solicitudes.map(s => `
+                ${serverOnly.map(s => `
                     <div class="detalle-section" style="border-left: 4px solid #28a745; padding-left: 1rem; margin-bottom: 1rem;">
                         <p><strong>Servidor:</strong> ${s.servidor}</p>
-                        <p><strong>Horario:</strong> ${s.horaEntrada} - ${s.horaSalida}</p>
+                        <p><strong>Horario:</strong> ${s.horaEntrada}-${s.horaSalida}</p>
                         <p><strong>Responsable:</strong> ${s.nombreResponsable} (${s.codigoResponsable})</p>
                         <p><strong>Curso:</strong> ${s.curso}</p>
                         <p><strong>Docente:</strong> ${s.docente}</p>
@@ -589,8 +626,8 @@
         function renderTable() {
             const tbody = document.getElementById('solicitudesTableBody');
             const filtered = currentFilter === 'TODAS' ? 
-                allSolicitudes : 
-                allSolicitudes.filter(s => s.estado === currentFilter);
+                serverSolicitudes : 
+                serverSolicitudes.filter(s => s.estado === currentFilter);
 
             if (filtered.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="empty-message">No hay solicitudes</td></tr>';
@@ -638,9 +675,29 @@
             });
         };
 
+        // Helper para renderizar integrantes que soporta ambas estructuras:
+        // - array de strings: ['Juan', 'Ana']
+        // - array de objetos: [{nombre:'Juan', codigo:'123'}]
+        function renderIntegrantesHTML(integrantes) {
+            if (!integrantes || integrantes.length === 0) return '<li>—</li>';
+            return integrantes.map(i => {
+                if (typeof i === 'string') return `<li>${i}</li>`;
+                if (i && i.nombre && i.codigo) return `<li>${i.nombre} (${i.codigo})</li>`;
+                // If it's an object with missing parts, fallback to JSON
+                return `<li>${JSON.stringify(i)}</li>`;
+            }).join('');
+        }
+
         // Ver detalles
         window.verDetalles = (id) => {
-            const solicitud = allSolicitudes.find(s => s.id === id);
+            // Buscar solo en las solicitudes de servidores
+            const solicitud = serverSolicitudes.find(s => s.id === id);
+            if (!solicitud) {
+                const content = document.getElementById('detallesContent');
+                content.innerHTML = `<p>No se encontró la solicitud de servidor solicitada.</p>`;
+                document.getElementById('detallesModal').style.display = 'block';
+                return;
+            }
             const content = document.getElementById('detallesContent');
             
             content.innerHTML = `
@@ -676,10 +733,15 @@
                 <div class="detalle-section">
                     <h3>Integrantes del Grupo</h3>
                     <ul>
-                        ${solicitud.integrantes.map(i => `<li>${i}</li>`).join('')}
+                        ${renderIntegrantesHTML(solicitud.integrantes)}
                     </ul>
                 </div>
-                
+
+                <div class="detalle-section">
+                    <h3>Administrado por</h3>
+                    <p>${solicitud.administrador ? solicitud.administrador : '—'}</p>
+                </div>
+
                 <div class="detalle-section">
                     <h3>Estado</h3>
                     <p><strong>Estado Actual:</strong> <span class="status-badge status-${solicitud.estado.toLowerCase()}">${solicitud.estado}</span></p>
@@ -714,7 +776,8 @@
                 await updateDoc(doc(db, 'solicitudes', selectedSolicitudId), {
                     estado: 'ACEPTADO',
                     respuestaAdmin: respuesta,
-                    fechaRespuesta: new Date().toISOString()
+                    fechaRespuesta: new Date().toISOString(),
+                    administrador: currentAdminName
                 });
                 
                 alert('✅ Solicitud aprobada exitosamente');
@@ -735,7 +798,8 @@
                 await updateDoc(doc(db, 'solicitudes', selectedSolicitudId), {
                     estado: 'RECHAZADO',
                     respuestaAdmin: `Solicitud RECHAZADA. Motivo: ${motivo}`,
-                    fechaRespuesta: new Date().toISOString()
+                    fechaRespuesta: new Date().toISOString(),
+                    administrador: currentAdminName
                 });
                 
                 alert('✅ Solicitud rechazada');
@@ -806,22 +870,7 @@
                 tiposAlquiler[s.tipoAlquiler] = (tiposAlquiler[s.tipoAlquiler] || 0) + 1;
             });
 
-            const arduinoCtx = document.getElementById('arduinoChart').getContext('2d');
-            if (arduinoChart) arduinoChart.destroy();
-            arduinoChart = new Chart(arduinoCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Kit Completo', 'Partes Individuales'],
-                    datasets: [{
-                        data: [tiposAlquiler.completo, tiposAlquiler.individual],
-                        backgroundColor: ['#007bff', '#28a745']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true
-                }
-            });
+            // 'Tipo de Alquiler' pie chart removed — mantenemos conteo si es necesario en otro lado.
 
             // Gráfica de componentes más solicitados
             const componentes = {};
@@ -863,7 +912,112 @@
                     }
                 }
             });
+
+            // Render calendar Arduino
+            renderCalendarArduino();
         }
+
+        // Render calendario Arduino
+        function renderCalendarArduino() {
+            const year = currentCalendarDateArduino.getFullYear();
+            const month = currentCalendarDateArduino.getMonth();
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            document.getElementById('currentMonthArduino').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const grid = document.getElementById('calendarGridArduino');
+            grid.innerHTML = '';
+
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                grid.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // Buscar solicitudes Arduino aceptadas para esta fecha
+                const solicitudesDelDia = allSolicitudesArduino.filter(s =>
+                    s.estado === 'ACEPTADO' && s.fecha === dateStr
+                );
+
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayCell.classList.add('today');
+                }
+
+                if (solicitudesDelDia.length > 0) {
+                    if (solicitudesDelDia.length === 1) {
+                        dayCell.classList.add('occupied');
+                    } else {
+                        dayCell.classList.add('multiple');
+                    }
+
+                    const info = solicitudesDelDia.map(s => `${s.nombreResponsable} (${s.horaEntrada}-${s.horaSalida})`).join('\n');
+                    dayCell.title = `${solicitudesDelDia.length} reserva(s) Arduino:\n${info}`;
+                    dayCell.style.cursor = 'pointer';
+                    dayCell.addEventListener('click', () => {
+                        mostrarDetallesDiaArduino(dateStr, solicitudesDelDia);
+                    });
+                }
+
+                dayCell.innerHTML = `<span class="day-number">${day}</span>`;
+                if (solicitudesDelDia.length > 0) {
+                    dayCell.innerHTML += `<span class="day-count">${solicitudesDelDia.length}</span>`;
+                }
+
+                grid.appendChild(dayCell);
+            }
+        }
+
+        // Mostrar detalles de un día para Arduino
+        function mostrarDetallesDiaArduino(fecha, solicitudes) {
+            const content = document.getElementById('detallesArduinoContent');
+            const arr = (solicitudes || []);
+            if (arr.length === 0) {
+                content.innerHTML = `<h3>Solicitudes para ${fecha}</h3><p>No hay solicitudes de Arduino para este día.</p>`;
+                document.getElementById('detallesArduinoModal').style.display = 'block';
+                return;
+            }
+
+            content.innerHTML = `
+                <h3>Solicitudes para ${fecha}</h3>
+                ${arr.map(s => `
+                    <div class="detalle-section" style="border-left: 4px solid #28a745; padding-left: 1rem; margin-bottom: 1rem;">
+                        <p><strong>Responsable:</strong> ${s.nombreResponsable} (${s.codigoResponsable})</p>
+                        <p><strong>Horario:</strong> ${s.horaEntrada} - ${s.horaSalida}</p>
+                        <p><strong>Tipo:</strong> ${s.tipoAlquiler === 'completo' ? 'Kit Completo' : 'Partes Individuales'}</p>
+                        <button class="btn btn-info btn-sm" onclick="window.verDetallesArduino('${s.id}')">Ver más detalles</button>
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('detallesArduinoModal').style.display = 'block';
+        }
+
+        // Navegación calendario Arduino
+        document.getElementById('prevMonthArduino').addEventListener('click', () => {
+            currentCalendarDateArduino.setMonth(currentCalendarDateArduino.getMonth() - 1);
+            renderCalendarArduino();
+        });
+
+        document.getElementById('nextMonthArduino').addEventListener('click', () => {
+            currentCalendarDateArduino.setMonth(currentCalendarDateArduino.getMonth() + 1);
+            renderCalendarArduino();
+        });
 
         // Filter buttons Arduino
         document.querySelectorAll('.filter-btn-arduino').forEach(btn => {
@@ -968,10 +1122,15 @@
                 <div class="detalle-section">
                     <h3>Integrantes del Grupo</h3>
                     <ul>
-                        ${solicitud.integrantes.map(i => `<li>${i}</li>`).join('')}
+                        ${renderIntegrantesHTML(solicitud.integrantes)}
                     </ul>
                 </div>
-                
+
+                <div class="detalle-section">
+                    <h3>Administrado por</h3>
+                    <p>${solicitud.administrador ? solicitud.administrador : '—'}</p>
+                </div>
+
                 <div class="detalle-section">
                     <h3>Estado</h3>
                     <p><strong>Estado Actual:</strong> <span class="status-badge status-${solicitud.estado.toLowerCase()}">${solicitud.estado}</span></p>
@@ -1006,7 +1165,8 @@
                 await updateDoc(doc(db, 'solicitudes_arduino', selectedSolicitudArduinoId), {
                     estado: 'ACEPTADO',
                     respuestaAdmin: respuesta,
-                    fechaRespuesta: new Date().toISOString()
+                    fechaRespuesta: new Date().toISOString(),
+                    administrador: currentAdminName
                 });
                 
                 alert('✅ Solicitud Arduino aprobada exitosamente');
@@ -1027,7 +1187,8 @@
                 await updateDoc(doc(db, 'solicitudes_arduino', selectedSolicitudArduinoId), {
                     estado: 'RECHAZADO',
                     respuestaAdmin: `Solicitud RECHAZADA. Motivo: ${motivo}`,
-                    fechaRespuesta: new Date().toISOString()
+                    fechaRespuesta: new Date().toISOString(),
+                    administrador: currentAdminName
                 });
                 
                 alert('✅ Solicitud Arduino rechazada');
