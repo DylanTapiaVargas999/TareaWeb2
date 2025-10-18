@@ -534,9 +534,11 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                // Buscar solicitudes aceptadas para esta fecha (solo solicitudes de SERVIDORES)
+                // Buscar solicitudes para esta fecha (solo solicitudes de SERVIDORES)
+                // NOTA: se incluyen solicitudes en cualquier estado excepto las explícitamente rechazadas,
+                // para que el calendario marque días con reservaciones pendientes/aprobadas.
                 const solicitudesDelDia = serverSolicitudes.filter(s =>
-                    s.estado === 'APROBADA' && s.fecha === dateStr && s.servidor
+                    s.fecha === dateStr && s.servidor && s.estado !== 'RECHAZADO'
                 );
 
                 const dayCell = document.createElement('div');
@@ -553,11 +555,13 @@
                 if (solicitudesDelDia.length > 0) {
                     dayCell.classList.add('has-solicitudes');
                     
-                    // Tooltip con información
-                    const servidoresInfo = solicitudesDelDia.map(s => 
-                        `${s.servidor} (${s.horaEntrada}-${s.horaSalida})`
-                    ).join('\n');
-                    dayCell.title = `${solicitudesDelDia.length} servidor(es) ocupado(s):\n${servidoresInfo}`;
+                    // Tooltip con información (mostrar servidor y horario)
+                    const servidoresInfo = solicitudesDelDia.map(s => {
+                        const entrada = s.horaEntrada || s.hora || (s.horario ? s.horario.split('-')[0] : '—');
+                        const salida = s.horaSalida || (s.hora ? s.hora.split('-')[1] : '—');
+                        return `${s.servidor} (${entrada}-${salida})`;
+                    }).join('\n');
+                    dayCell.title = `${solicitudesDelDia.length} reserva(s):\n${servidoresInfo}`;
                     
                     // Click para mostrar detalles
                     dayCell.addEventListener('click', () => {
@@ -567,14 +571,14 @@
 
                 dayCell.innerHTML = `
                     <div class="day-number">${day}</div>
-                    ${solicitudesDelDia.length > 0 ? `<div class="solicitud-count">${solicitudesDelDia.length} reservas</div>` : ''}
+                    ${solicitudesDelDia.length > 0 ? `<div class="solicitud-count">${solicitudesDelDia.length} reserva(s)</div>` : ''}
                 `;
 
                 grid.appendChild(dayCell);
             }
         }
 
-        // Mostrar detalles de un día específico
+        // Mostrar detalles de un día específico (lista compacta tipo informe)
         function mostrarDetallesDia(fecha, solicitudes) {
             const content = document.getElementById('detallesContent');
             const serverOnly = (solicitudes || []).filter(s => s.servidor);
@@ -591,51 +595,15 @@
             }
 
             content.innerHTML = `
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <span class="detail-label">Fecha</span>
-                        <span class="detail-value">${fecha}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Total de Reservas</span>
-                        <span class="detail-value">${serverOnly.length} servidor(es)</span>
-                    </div>
-                </div>
-                <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid var(--upt-gris-claro);">
-                ${serverOnly.map((s, index) => `
-                    <div class="solicitud-card" style="margin-bottom: 1rem;">
-                        <div class="solicitud-header">
-                            <h4 style="color: var(--upt-azul-oscuro); margin: 0;">Reserva ${index + 1}</h4>
-                        </div>
-                        <div class="solicitud-info">
-                            <div class="info-item">
-                                <span class="info-label">Servidor</span>
-                                <span class="info-value">${s.servidor}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Horario</span>
-                                <span class="info-value">${s.horaEntrada} - ${s.horaSalida}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Responsable</span>
-                                <span class="info-value">${s.nombreResponsable}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Código</span>
-                                <span class="info-value">${s.codigoResponsable}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Curso</span>
-                                <span class="info-value">${s.curso}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Docente</span>
-                                <span class="info-value">${s.docente}</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-small" onclick="window.verDetalles('${s.id}')" style="margin-top: 1rem;">
-                            Ver Detalles Completos
-                        </button>
+                <h3 style="margin-top:0;">Solicitudes para ${fecha}</h3>
+                ${serverOnly.map(s => `
+                    <div class="detalle-dia" style="border-left:4px solid #14a14a; padding-left:1rem; margin-bottom:1rem;">
+                        <p><strong>Servidor:</strong> ${s.servidor || '—'}</p>
+                        <p><strong>Horario:</strong> ${s.horaEntrada || s.hora || '—'} - ${s.horaSalida || ''}</p>
+                        <p><strong>Responsable:</strong> ${s.nombreResponsable || '—'} ${s.codigoResponsable ? `(${s.codigoResponsable})` : ''}</p>
+                        <p><strong>Curso:</strong> ${s.curso || '—'}</p>
+                        <p><strong>Docente:</strong> ${s.docente || '—'}</p>
+                        <button class="btn btn-info" onclick="window.verDetalles('${s.id}')" style="margin-top:0.5rem;">Ver más detalles</button>
                     </div>
                 `).join('')}
             `;
@@ -982,9 +950,9 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                // Buscar solicitudes Arduino aprobadas para esta fecha
+                // Buscar solicitudes Arduino para esta fecha (excluir RECHAZADO) para marcar pendientes y aceptadas
                 const solicitudesDelDia = allSolicitudesArduino.filter(s =>
-                    s.estado === 'APROBADA' && s.fecha === dateStr
+                    s.fecha === dateStr && s.estado !== 'RECHAZADO'
                 );
 
                 const dayCell = document.createElement('div');
@@ -999,7 +967,11 @@
                 if (solicitudesDelDia.length > 0) {
                     dayCell.classList.add('has-solicitudes');
 
-                    const info = solicitudesDelDia.map(s => `${s.nombreResponsable} (${s.horaEntrada}-${s.horaSalida})`).join('\n');
+                    const info = solicitudesDelDia.map(s => {
+                        const entrada = s.horaEntrada || s.hora || (s.horario ? s.horario.split('-')[0] : '—');
+                        const salida = s.horaSalida || (s.hora ? s.hora.split('-')[1] : '—');
+                        return `${s.nombreResponsable || s.codigoResponsable || '—'} (${entrada}-${salida})`;
+                    }).join('\n');
                     dayCell.title = `${solicitudesDelDia.length} reserva(s) Arduino:\n${info}`;
                     dayCell.addEventListener('click', () => {
                         mostrarDetallesDiaArduino(dateStr, solicitudesDelDia);
@@ -1015,10 +987,10 @@
             }
         }
 
-        // Mostrar detalles de un día para Arduino
+        // Mostrar detalles de un día para Arduino (lista compacta tipo informe)
         function mostrarDetallesDiaArduino(fecha, solicitudes) {
             const content = document.getElementById('detallesArduinoContent');
-            const arr = (solicitudes || []);
+            const arr = (solicitudes || []).filter(s => s.estado !== 'RECHAZADO');
             if (arr.length === 0) {
                 content.innerHTML = `<h3>Solicitudes para ${fecha}</h3><p>No hay solicitudes de Arduino para este día.</p>`;
                 document.getElementById('detallesArduinoModal').style.display = 'block';
@@ -1026,13 +998,13 @@
             }
 
             content.innerHTML = `
-                <h3>Solicitudes para ${fecha}</h3>
+                <h3 style="margin-top:0;">Solicitudes para ${fecha}</h3>
                 ${arr.map(s => `
-                    <div class="detalle-section" style="border-left: 4px solid #28a745; padding-left: 1rem; margin-bottom: 1rem;">
-                        <p><strong>Responsable:</strong> ${s.nombreResponsable} (${s.codigoResponsable})</p>
-                        <p><strong>Horario:</strong> ${s.horaEntrada} - ${s.horaSalida}</p>
+                    <div class="detalle-dia" style="border-left:4px solid #14a14a; padding-left:1rem; margin-bottom:1rem;">
+                        <p><strong>Responsable:</strong> ${s.nombreResponsable || '—'} ${s.codigoResponsable ? `(${s.codigoResponsable})` : ''}</p>
+                        <p><strong>Horario:</strong> ${s.horaEntrada || s.hora || '—'} - ${s.horaSalida || ''}</p>
                         <p><strong>Tipo:</strong> ${s.tipoAlquiler === 'completo' ? 'Kit Completo' : 'Partes Individuales'}</p>
-                        <button class="btn btn-info btn-sm" onclick="window.verDetallesArduino('${s.id}')">Ver más detalles</button>
+                        <button class="btn btn-info" onclick="window.verDetallesArduino('${s.id}')" style="margin-top:0.25rem;">Ver más detalles</button>
                     </div>
                 `).join('')}
             `;
