@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejoras Realizadas - Sistema UPT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F4F4F4;
+            color: #2C3E50;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 61, 115, 0.12);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #FFC600;
+            padding-bottom: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+        }
+        
+        h1 {
+            color: #003D73;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            color: #003D73;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            border-left: 5px solid #FFC600;
+            padding-left: 1rem;
+        }
+        
+        h3 {
+            color: #003D73;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        .section {
+            background: #F4F4F4;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            border-left: 4px solid #003D73;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 61, 115, 0.08);
+            border-top: 4px solid #FFC600;
+        }
+        
+        .feature-card h4 {
+            color: #003D73;
+            margin-bottom: 0.5rem;
+        }
+        
+        ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .check {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .issue {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .solution {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        code {
+            background: #003D73;
+            color: #FFC600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .color-box {
+            text-align: center;
+        }
+        
+        .color-swatch {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://pbs.twimg.com/profile_images/971067995215843329/OYOGVRee_400x400.jpg" alt="Logo UPT" class="logo">
+            <h1>🎨 Mejoras Realizadas al Sistema</h1>
+            <p>Universidad Privada de Tacna - Sistema de Préstamo de Equipos</p>
+        </div>
+
+        <h2>📋 Resumen de Cambios</h2>
+        <div class="section">
+            <p>Se ha realizado un rediseño completo del sistema para lograr un aspecto más profesional, limpio y acorde a la identidad institucional de la UPT.</p>
+        </div>
+
+        <h2>🎨 Paleta de Colores Institucional</h2>
+        <div class="color-palette">
+            <div class="color-box">
+                <div class="color-swatch" style="background: #003D73;"></div>
+                <strong>#003D73</strong>
+                <p>Azul Oscuro</p>
+                <small>Color principal</small>
+            </div>
+            <div class="color-box">
+                <div class="color-swatch" style="background: #FFC600;"></div>
+                <strong>#FFC600</strong>
+                <p>Amarillo</p>
+                <small>Color de acento</small>
+            </div>
+            <div class="color-box">
+                <div class="color-swatch" style="background: #FFFFFF; border: 2px solid #E0E0E0;"></div>
+                <strong>#FFFFFF</strong>
+                <p>Blanco</p>
+                <small>Fondos principales</small>
+            </div>
+            <div class="color-box">
+                <div class="color-swatch" style="background: #F4F4F4;"></div>
+                <strong>#F4F4F4</strong>
+                <p>Gris Claro</p>
+                <small>Fondos secundarios</small>
+            </div>
+        </div>
+
+        <h2>🔧 Problemas Identificados y Solucionados</h2>
+
+        <div class="issue">
+            <h3>❌ Problema 1: Dashboard todo blanco</h3>
+            <p>El dashboard carecía de contraste y estructura visual clara.</p>
+        </div>
+        <div class="solution">
+            <h3>✅ Solución:</h3>
+            <ul>
+                <li>Rediseño de tarjetas estadísticas con bordes de colores</li>
+                <li>Aplicación de fondos blancos con sombras suaves</li>
+                <li>Bordes superiores en azul institucional para secciones</li>
+                <li>Separación visual clara entre componentes</li>
+            </ul>
+        </div>
+
+        <div class="issue">
+            <h3>❌ Problema 2: Calendario no se mostraba correctamente</h3>
+            <p>Los días del calendario estaban duplicados y no se veían las fechas con solicitudes.</p>
+        </div>
+        <div class="solution">
+            <h3>✅ Solución:</h3>
+            <ul>
+                <li>Eliminación de encabezados duplicados de días de la semana</li>
+                <li>Corrección de estados de solicitudes (<code>APROBADA</code> en lugar de <code>ACEPTADO</code>)</li>
+                <li>Implementación de días con amarillo para fechas con reservas</li>
+                <li>Añadido contador de reservas por día</li>
+                <li>Mejora en el diseño responsive del calendario</li>
+            </ul>
+        </div>
+
+        <div class="issue">
+            <h3>❌ Problema 3: Formularios y modales mal estructurados</h3>
+            <p>Los modales no tenían encabezados definidos y los botones estaban mal posicionados.</p>
+        </div>
+        <div class="solution">
+            <h3>✅ Solución:</h3>
+            <ul>
+                <li>Creación de estructura modal con header, body y footer</li>
+                <li>Header con fondo azul institucional y botón de cierre</li>
+                <li>Footer con botones centrados y espaciado correcto</li>
+                <li>Animación de entrada tipo "slide down"</li>
+            </ul>
+        </div>
+
+        <div class="issue">
+            <h3>❌ Problema 4: Falta de navegación clara</h3>
+            <p>No había elementos visuales que guiaran al usuario.</p>
+        </div>
+        <div class="solution">
+            <h3>✅ Solución:</h3>
+            <ul>
+                <li>Integración del logo de la UPT en todas las páginas</li>
+                <li>Navbar con información institucional clara</li>
+                <li>Tabs mejorados con íconos y colores distintivos</li>
+                <li>Borde amarillo en navbar para identidad visual</li>
+            </ul>
+        </div>
+
+        <h2>✨ Mejoras Implementadas</h2>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🏛️ Identidad Institucional</h4>
+                <ul>
+                    <li>Logo UPT visible</li>
+                    <li>Colores oficiales</li>
+                    <li>Tipografía profesional</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>📊 Dashboard Mejorado</h4>
+                <ul>
+                    <li>Tarjetas estadísticas</li>
+                    <li>Bordes de colores</li>
+                    <li>Valores destacados</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>📅 Calendario Funcional</h4>
+                <ul>
+                    <li>Grid correctamente formateado</li>
+                    <li>Días con reservas destacados</li>
+                    <li>Navegación intuitiva</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>🎯 Modales Profesionales</h4>
+                <ul>
+                    <li>Headers con colores</li>
+                    <li>Estructura clara</li>
+                    <li>Animaciones suaves</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>📋 Tablas Optimizadas</h4>
+                <ul>
+                    <li>Encabezado azul oscuro</li>
+                    <li>Hover gris claro</li>
+                    <li>Mejor legibilidad</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>🎨 Diseño Responsive</h4>
+                <ul>
+                    <li>Adaptable a móviles</li>
+                    <li>Grid flexible</li>
+                    <li>Navegación optimizada</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📱 Archivos Modificados</h2>
+        <div class="section">
+            <h3><span class="check">✓</span> css/styles.css</h3>
+            <p>Rediseño completo con variables CSS, colores institucionales y nuevos componentes.</p>
+
+            <h3><span class="check">✓</span> admin.html</h3>
+            <ul>
+                <li>Navbar con logo UPT</li>
+                <li>Dashboard reestructurado</li>
+                <li>Calendario corregido</li>
+                <li>Modales con headers</li>
+                <li>Filtros con íconos</li>
+            </ul>
+
+            <h3><span class="check">✓</span> alumno.html</h3>
+            <ul>
+                <li>Navbar con logo UPT</li>
+                <li>Formularios mejorados</li>
+                <li>Tabs más claros</li>
+            </ul>
+
+            <h3><span class="check">✓</span> login_register.html</h3>
+            <ul>
+                <li>Logo UPT circular</li>
+                <li>Header azul institucional</li>
+                <li>Formularios profesionales</li>
+            </ul>
+
+            <h3><span class="check">✓</span> index.html</h3>
+            <ul>
+                <li>Pantalla de carga con logo</li>
+                <li>Colores institucionales</li>
+            </ul>
+
+            <h3><span class="check">✓</span> README.md</h3>
+            <ul>
+                <li>Documentación actualizada</li>
+                <li>Información de diseño</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Características del Nuevo Diseño</h2>
+        <div class="section">
+            <ul>
+                <li><strong>Limpio y Profesional:</strong> Espaciado generoso, tipografía clara, jerarquía visual</li>
+                <li><strong>Consistente:</strong> Mismos colores y estilos en todo el sistema</li>
+                <li><strong>Accesible:</strong> Buen contraste, tamaños de fuente legibles</li>
+                <li><strong>Responsive:</strong> Funciona perfectamente en todos los dispositivos</li>
+                <li><strong>Moderno:</strong> Animaciones suaves, sombras sutiles, bordes redondeados</li>
+                <li><strong>Institucional:</strong> Refleja la identidad de la UPT</li>
+            </ul>
+        </div>
+
+        <h2>📖 Guía de Uso</h2>
+        <div class="section">
+            <h3>Para Administradores:</h3>
+            <ol>
+                <li>Inicia sesión con credenciales de admin</li>
+                <li>Dashboard muestra estadísticas en tiempo real</li>
+                <li>Navega entre "Servidores" y "Arduino" con los tabs superiores</li>
+                <li>El calendario muestra días con reservas en amarillo</li>
+                <li>Haz clic en un día del calendario para ver detalles</li>
+                <li>Usa los filtros para organizar solicitudes</li>
+                <li>Los modales tienen estructura clara con headers azules</li>
+            </ol>
+
+            <h3>Para Alumnos:</h3>
+            <ol>
+                <li>Regístrate o inicia sesión</li>
+                <li>Navega entre las tabs: "Nueva Solicitud", "Solicitud Arduino", "Mis Solicitudes"</li>
+                <li>Completa los formularios con información clara</li>
+                <li>Revisa el historial de tus solicitudes</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #F4F4F4; text-align: center; color: #6c757d;">
+            <p><strong>Sistema de Préstamo de Equipos</strong></p>
+            <p>Universidad Privada de Tacna</p>
+            <p>Diseño actualizado - Octubre 2025</p>
+        </div>
+    </div>
+</body>
+</html>

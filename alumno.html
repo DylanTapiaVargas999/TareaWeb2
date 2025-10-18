@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal del Alumno - Préstamo de Servidores</title>
+    <title>Portal del Alumno - UPT</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">📡 Sistema de Préstamo</div>
-        <div class="nav-user">
-            <span id="userName">Usuario</span>
-            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        <div class="navbar-content">
+            <div class="nav-brand">
+                <img src="https://pbs.twimg.com/profile_images/971067995215843329/OYOGVRee_400x400.jpg" alt="UPT Logo" class="logo-upt">
+                <div class="nav-brand-text">
+                    <span class="nav-brand-title">Sistema de Préstamo de Equipos</span>
+                    <span class="nav-brand-subtitle">Universidad Privada de Tacna</span>
+                </div>
+            </div>
+            <div class="nav-user">
+                <span id="userName">Usuario</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
         </div>
     </nav>
 
@@ -25,7 +33,9 @@
         <!-- Nueva Solicitud -->
         <div class="tab-content active" id="nuevaTab">
             <div class="card">
-                <h2>Formulario de Solicitud</h2>
+                <h2>Solicitud de Préstamo de Servidor</h2>
+                <p style="color: #6c757d; margin-bottom: 2rem;">Complete todos los campos marcados con (*) para solicitar el préstamo de un servidor.</p>
+                
                 <form id="solicitudForm">
                     <div class="form-section">
                         <h3>Identificación del Responsable</h3>
@@ -125,7 +135,9 @@
         <!-- Nueva Solicitud Arduino -->
         <div class="tab-content" id="arduinoTab">
             <div class="card">
-                <h2>Formulario de Solicitud - Kit Arduino</h2>
+                <h2>Solicitud de Préstamo de Kit Arduino</h2>
+                <p style="color: #6c757d; margin-bottom: 2rem;">Puede solicitar el kit completo o seleccionar componentes individuales según su proyecto.</p>
+                
                 <form id="solicitudArduinoForm">
                     <div class="form-section">
                         <h3>Identificación del Responsable</h3>
@@ -193,10 +205,14 @@
 
                     <div class="form-section" id="partesIndividualesSection" style="display: none;">
                         <h3>Seleccione las Partes del Kit Arduino</h3>
+                        <p style="color: #6c757d; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            Marque los componentes que necesita para su proyecto. Puede seleccionar múltiples elementos de cada categoría.
+                        </p>
                         
+                        <div class="componentes-container">
                         <!-- Placas Arduino -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">🔷 Placas Arduino</h4>
+                            <h4 class="categoria-titulo">Placas Arduino</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Placa Arduino UNO"> Arduino UNO R3</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Placa Arduino MEGA"> Arduino MEGA 2560</label>
@@ -206,7 +222,7 @@
 
                         <!-- Pantallas y Displays -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">📺 Pantallas y Displays</h4>
+                            <h4 class="categoria-titulo">Pantallas y Displays</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Pantalla LCD 16x2"> Pantalla LCD 16x2 (con I2C)</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Pantalla LCD 20x4"> Pantalla LCD 20x4 (con I2C)</label>
@@ -217,7 +233,7 @@
 
                         <!-- Sensores -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">🔍 Sensores</h4>
+                            <h4 class="categoria-titulo">Sensores</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Sensor Ultrasónico HC-SR04"> Sensor Ultrasónico HC-SR04 (distancia)</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Sensor DHT11"> Sensor DHT11 (Temperatura/Humedad)</label>
@@ -230,7 +246,7 @@
 
                         <!-- Módulos de Comunicación -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">📡 Módulos de Comunicación</h4>
+                            <h4 class="categoria-titulo">Módulos de Comunicación</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Módulo Bluetooth HC-05"> Módulo Bluetooth HC-05</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Módulo WiFi ESP8266"> Módulo WiFi ESP8266</label>
@@ -240,7 +256,7 @@
 
                         <!-- Motores y Actuadores -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">⚙️ Motores y Actuadores</h4>
+                            <h4 class="categoria-titulo">Motores y Actuadores</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Servomotor SG90"> Servomotor SG90 (Micro servo)</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Servomotor MG996R"> Servomotor MG996R (Alto torque)</label>
@@ -253,7 +269,7 @@
 
                         <!-- LEDs e Iluminación -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">💡 LEDs e Iluminación</h4>
+                            <h4 class="categoria-titulo">LEDs e Iluminación</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="LEDs Básicos"> LEDs Básicos (Set de 5 colores x 5 unidades)</label>
                                 <label><input type="checkbox" class="parte-arduino" value="LEDs RGB"> LEDs RGB (ánodo común)</label>
@@ -263,7 +279,7 @@
 
                         <!-- Componentes Electrónicos Básicos -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">🔌 Componentes Electrónicos Básicos</h4>
+                            <h4 class="categoria-titulo">Componentes Electrónicos Básicos</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Resistencias"> Resistencias (Set variado: 220Ω, 1KΩ, 10KΩ)</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Potenciómetros"> Potenciómetros 10KΩ (x2)</label>
@@ -287,7 +303,7 @@
 
                         <!-- Otros Módulos -->
                         <div class="componentes-categoria">
-                            <h4 class="categoria-titulo">🎛️ Otros Módulos</h4>
+                            <h4 class="categoria-titulo">Otros Módulos</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" class="parte-arduino" value="Módulo RTC DS3231"> Módulo Reloj de Tiempo Real DS3231</label>
                                 <label><input type="checkbox" class="parte-arduino" value="Módulo SD Card"> Módulo Lector MicroSD</label>
@@ -296,7 +312,8 @@
                                 <label><input type="checkbox" class="parte-arduino" value="Módulo Relé 4 Canales"> Módulo Relé 4 Canales 5V</label>
                             </div>
                         </div>
-
+                        
+                        </div><!-- Fin componentes-container -->
                     </div>
 
                     <div class="form-section" id="kitCompletoInfo" style="display: none;">
@@ -345,7 +362,8 @@ Kit Arduino Completo incluye:
         <!-- Historial -->
         <div class="tab-content" id="historialTab">
             <div class="card">
-                <h2>Mis Solicitudes</h2>
+                <h2>Historial de Mis Solicitudes</h2>
+                <p style="color: #6c757d; margin-bottom: 2rem;">Aquí puede ver todas sus solicitudes de préstamo y su estado actual.</p>
                 <div id="solicitudesList"></div>
             </div>
         </div>
@@ -918,7 +936,13 @@ Kit Arduino Completo incluye:
                 ]);
                 
                 if (querySnapshot1.empty && querySnapshot2.empty) {
-                    container.innerHTML = '<p class="empty-message">No tienes solicitudes registradas</p>';
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <p class="empty-state-text">No tienes solicitudes registradas</p>
+                            <p class="empty-state-subtext">Tus solicitudes aparecerán aquí una vez que las envíes</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -956,40 +980,67 @@ Kit Arduino Completo incluye:
                         div.innerHTML = `
                             <div class="solicitud-header">
                                 <div>
-                                    <h3>🔧 Arduino - ${data.curso}</h3>
-                                    <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
+                                    <h3 class="solicitud-title">Kit Arduino - ${data.curso}</h3>
+                                    <p class="solicitud-date">${data.fecha} | ${data.horaEntrada} - ${data.horaSalida}</p>
                                 </div>
-                                <span class="status-badge ${statusClass}">${data.estado}</span>
+                                <span class="status ${data.estado}">${data.estado}</span>
                             </div>
-                            <div class="solicitud-body">
-                                <p><strong>Tipo:</strong> ${recursoTexto}</p>
-                                <p><strong>Docente:</strong> ${data.docente}</p>
-                                <p><strong>Propósito:</strong> ${data.proposito}</p>
-                                <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
-                                ${data.respuestaAdmin ? `
-                                    <div class="admin-response">
-                                        <strong>Respuesta del Administrador:</strong>
-                                        <p>${data.respuestaAdmin}</p>
-                                    </div>
-                                ` : ''}
+                            <div class="solicitud-info">
+                                <div class="info-item">
+                                    <span class="info-label">Tipo</span>
+                                    <span class="info-value">${recursoTexto}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Docente</span>
+                                    <span class="info-value">${data.docente}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Propósito</span>
+                                    <span class="info-value">${data.proposito}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Integrantes</span>
+                                    <span class="info-value">${data.integrantes.length} personas</span>
+                                </div>
                             </div>
+                            ${data.respuestaAdmin ? `
+                                <div class="alert alert-info" style="margin-top: 1rem;">
+                                    <strong>Respuesta del Administrador:</strong><br>
+                                    ${data.respuestaAdmin}
+                                </div>
+                            ` : ''}
                         `;
                     } else {
                         div.innerHTML = `
                             <div class="solicitud-header">
                                 <div>
-                                    <h3>🖥️ ${data.servidor} - ${data.curso}</h3>
-                                    <p class="solicitud-date">📅 ${data.fecha} | ⏰ ${data.horaEntrada} - ${data.horaSalida}</p>
+                                    <h3 class="solicitud-title">${data.servidor} - ${data.curso}</h3>
+                                    <p class="solicitud-date">${data.fecha} | ${data.horaEntrada} - ${data.horaSalida}</p>
                                 </div>
-                                <span class="status-badge ${statusClass}">${data.estado}</span>
+                                <span class="status ${data.estado}">${data.estado}</span>
                             </div>
-                            <div class="solicitud-body">
-                                <p><strong>Docente:</strong> ${data.docente}</p>
-                                <p><strong>Integrantes:</strong> ${data.integrantes.length} personas</p>
-                                ${data.respuestaAdmin ? `
-                                    <div class="admin-response">
-                                        <strong>Respuesta del Administrador:</strong>
-                                        <p>${data.respuestaAdmin}</p>
+                            <div class="solicitud-info">
+                                <div class="info-item">
+                                    <span class="info-label">Servidor</span>
+                                    <span class="info-value">${data.servidor}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Docente</span>
+                                    <span class="info-value">${data.docente}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Propósito</span>
+                                    <span class="info-value">${data.proposito}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Integrantes</span>
+                                    <span class="info-value">${data.integrantes.length} personas</span>
+                                </div>
+                            </div>
+                            ${data.respuestaAdmin ? `
+                                <div class="alert alert-info" style="margin-top: 1rem;">
+                                    <strong>Respuesta del Administrador:</strong><br>
+                                    ${data.respuestaAdmin}
                                     </div>
                                 ` : ''}
                             </div>
@@ -1001,7 +1052,7 @@ Kit Arduino Completo incluye:
             } catch (error) {
                 console.error('Error cargando solicitudes:', error);
                 const container = document.getElementById('solicitudesList');
-                container.innerHTML = '<p class="empty-message">❌ Error al cargar solicitudes: ' + error.message + '</p>';
+                container.innerHTML = '<p class="empty-message">Error al cargar solicitudes: ' + error.message + '</p>';
             }
         }
     </script>

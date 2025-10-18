@@ -3,86 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrador - Préstamo de Servidores</title>
+    <title>Panel Administrador - UPT</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">🔐 Panel de Administración</div>
-        <div class="nav-user">
-            <span id="adminName">Administrador</span>
-            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        <div class="navbar-content">
+            <div class="nav-brand">
+                <img src="https://pbs.twimg.com/profile_images/971067995215843329/OYOGVRee_400x400.jpg" alt="UPT Logo" class="logo-upt">
+                <div class="nav-brand-text">
+                    <span class="nav-brand-title">Panel de Administración</span>
+                    <span class="nav-brand-subtitle">Universidad Privada de Tacna</span>
+                </div>
+            </div>
+            <div class="nav-user">
+                <span id="adminName">Administrador</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
         </div>
     </nav>
 
     <div class="container">
         <!-- Navegación entre secciones -->
         <div class="admin-tabs" style="margin-bottom: 2rem;">
-            <button class="tab-btn active" data-section="servidores">🖥️ Solicitudes de Servidores</button>
-            <button class="tab-btn" data-section="arduino">🔧 Solicitudes de Arduino</button>
+            <button class="tab-btn active" data-section="servidores">Solicitudes de Servidores</button>
+            <button class="tab-btn" data-section="arduino">Solicitudes de Arduino</button>
         </div>
 
         <!-- SECCIÓN SERVIDORES -->
         <div class="admin-section" id="servidoresSection" style="display: block;">
+        
+        <!-- Título de Sección -->
+        <div class="card">
+            <h2>Dashboard de Solicitudes de Servidores</h2>
+        </div>
+
         <!-- Dashboard -->
         <div class="dashboard">
-            <h2>Dashboard de Solicitudes de Servidores</h2>
-            
-            <!-- Indicadores Numéricos -->
-            <div class="stats-grid">
-                <div class="stat-card stat-total">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-info">
-                        <h3 id="totalSolicitudes">0</h3>
-                        <p>Total Solicitudes</p>
+            <div class="stat-card total">
+                <h3>TOTAL</h3>
+                <div class="stat-value" id="totalSolicitudes">0</div>
+            </div>
+            <div class="stat-card pendientes">
+                <h3>PENDIENTES</h3>
+                <div class="stat-value" id="totalPendientes">0</div>
+            </div>
+            <div class="stat-card aprobadas">
+                <h3>APROBADAS</h3>
+                <div class="stat-value" id="totalAprobadas">0</div>
+            </div>
+            <div class="stat-card rechazadas">
+                <h3>RECHAZADAS</h3>
+                <div class="stat-value" id="totalRechazadas">0</div>
+            </div>
+        </div>
+
+        <!-- Calendario y Gráfico en Grid -->
+        <div class="charts-grid">
+            <!-- Calendario a la izquierda -->
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <h3>Calendario de Ocupación</h3>
+                    <div class="calendar-nav">
+                        <button id="prevMonth" class="btn btn-secondary">Anterior</button>
+                        <span id="currentMonth" style="font-weight: 600; color: var(--upt-azul-oscuro);"></span>
+                        <button id="nextMonth" class="btn btn-secondary">Siguiente</button>
                     </div>
                 </div>
-                <div class="stat-card stat-pendiente">
-                    <div class="stat-icon">⏳</div>
-                    <div class="stat-info">
-                        <h3 id="totalPendientes">0</h3>
-                        <p>Pendientes</p>
-                    </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Dom</div>
+                    <div class="calendar-day-header">Lun</div>
+                    <div class="calendar-day-header">Mar</div>
+                    <div class="calendar-day-header">Mié</div>
+                    <div class="calendar-day-header">Jue</div>
+                    <div class="calendar-day-header">Vie</div>
+                    <div class="calendar-day-header">Sáb</div>
                 </div>
-                <div class="stat-card stat-aprobado">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-info">
-                        <h3 id="totalAprobadas">0</h3>
-                        <p>Aprobadas</p>
-                    </div>
-                </div>
-                <div class="stat-card stat-rechazado">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-info">
-                        <h3 id="totalRechazadas">0</h3>
-                        <p>Rechazadas</p>
-                    </div>
-                </div>
+                <div id="calendarGrid" class="calendar-grid"></div>
             </div>
 
-            <!-- Gráficas -->
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <h3>📅 Calendario de Ocupación de Servidores</h3>
-                    <div id="calendarContainer" class="calendar-container">
-                        <div class="calendar-header">
-                            <button id="prevMonth" class="btn btn-sm btn-secondary">◀</button>
-                            <h4 id="currentMonth"></h4>
-                            <button id="nextMonth" class="btn btn-sm btn-secondary">▶</button>
-                        </div>
-                        <div class="calendar-legend">
-                            <span><span class="legend-dot available"></span> Disponible</span>
-                            <span><span class="legend-dot occupied"></span> Ocupado</span>
-                            <span><span class="legend-dot multiple"></span> Múltiples</span>
-                        </div>
-                        <div id="calendarGrid" class="calendar-grid"></div>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <h3>Demanda por Servidor</h3>
-                    <canvas id="barChart"></canvas>
-                </div>
+            <!-- Gráfica a la derecha -->
+            <div class="chart-container">
+                <h3>Demanda por Servidor</h3>
+                <canvas id="barChart"></canvas>
             </div>
         </div>
 
@@ -90,11 +94,11 @@
         <div class="card">
             <h2>Gestión de Solicitudes</h2>
             
-            <div class="filter-tabs">
+            <div class="filters">
                 <button class="filter-btn active" data-filter="TODAS">Todas</button>
                 <button class="filter-btn" data-filter="PENDIENTE">Pendientes</button>
-                <button class="filter-btn" data-filter="ACEPTADO">Aprobadas</button>
-                <button class="filter-btn" data-filter="RECHAZADO">Rechazadas</button>
+                <button class="filter-btn" data-filter="APROBADA">Aprobadas</button>
+                <button class="filter-btn" data-filter="RECHAZADA">Rechazadas</button>
             </div>
 
             <div class="table-container">
@@ -125,65 +129,60 @@
 
         <!-- SECCIÓN ARDUINO -->
         <div class="admin-section" id="arduinoSection" style="display: none;">
+        
+        <!-- Título de Sección -->
+        <div class="card">
+            <h2>Dashboard de Solicitudes Arduino</h2>
+        </div>
+
         <!-- Dashboard Arduino -->
         <div class="dashboard">
-            <h2>Dashboard de Solicitudes de Arduino</h2>
-            
-            <!-- Indicadores Numéricos -->
-            <div class="stats-grid">
-                <div class="stat-card stat-total">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-info">
-                        <h3 id="totalSolicitudesArduino">0</h3>
-                        <p>Total Solicitudes</p>
+            <div class="stat-card total">
+                <h3>TOTAL</h3>
+                <div class="stat-value" id="totalSolicitudesArduino">0</div>
+            </div>
+            <div class="stat-card pendientes">
+                <h3>PENDIENTES</h3>
+                <div class="stat-value" id="totalPendientesArduino">0</div>
+            </div>
+            <div class="stat-card aprobadas">
+                <h3>APROBADAS</h3>
+                <div class="stat-value" id="totalAprobadasArduino">0</div>
+            </div>
+            <div class="stat-card rechazadas">
+                <h3>RECHAZADAS</h3>
+                <div class="stat-value" id="totalRechazadasArduino">0</div>
+            </div>
+        </div>
+
+        <!-- Calendario y Gráfico Arduino en Grid -->
+        <div class="charts-grid">
+            <!-- Calendario Arduino a la izquierda -->
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <h3>Calendario de Ocupación - Arduino</h3>
+                    <div class="calendar-nav">
+                        <button id="prevMonthArduino" class="btn btn-secondary">Anterior</button>
+                        <span id="currentMonthArduino" style="font-weight: 600; color: var(--upt-azul-oscuro);"></span>
+                        <button id="nextMonthArduino" class="btn btn-secondary">Siguiente</button>
                     </div>
                 </div>
-                <div class="stat-card stat-pendiente">
-                    <div class="stat-icon">⏳</div>
-                    <div class="stat-info">
-                        <h3 id="totalPendientesArduino">0</h3>
-                        <p>Pendientes</p>
-                    </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Dom</div>
+                    <div class="calendar-day-header">Lun</div>
+                    <div class="calendar-day-header">Mar</div>
+                    <div class="calendar-day-header">Mié</div>
+                    <div class="calendar-day-header">Jue</div>
+                    <div class="calendar-day-header">Vie</div>
+                    <div class="calendar-day-header">Sáb</div>
                 </div>
-                <div class="stat-card stat-aprobado">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-info">
-                        <h3 id="totalAprobadasArduino">0</h3>
-                        <p>Aprobadas</p>
-                    </div>
-                </div>
-                <div class="stat-card stat-rechazado">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-info">
-                        <h3 id="totalRechazadasArduino">0</h3>
-                        <p>Rechazadas</p>
-                    </div>
-                </div>
+                <div id="calendarGridArduino" class="calendar-grid"></div>
             </div>
 
-            <!-- Gráfica de Arduino -->
-            <div class="charts-grid">
-                <!-- 'Tipo de Alquiler - Arduino' chart removed as requested -->
-                <div class="chart-card">
-                    <h3>Componentes Más Solicitados</h3>
-                    <canvas id="componentesChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>📅 Calendario de Ocupación - Arduino</h3>
-                    <div id="calendarContainerArduino" class="calendar-container">
-                        <div class="calendar-header">
-                            <button id="prevMonthArduino" class="btn btn-sm btn-secondary">◀</button>
-                            <h4 id="currentMonthArduino"></h4>
-                            <button id="nextMonthArduino" class="btn btn-sm btn-secondary">▶</button>
-                        </div>
-                        <div class="calendar-legend">
-                            <span><span class="legend-dot available"></span> Disponible</span>
-                            <span><span class="legend-dot occupied"></span> Ocupado</span>
-                            <span><span class="legend-dot multiple"></span> Múltiples</span>
-                        </div>
-                        <div id="calendarGridArduino" class="calendar-grid"></div>
-                    </div>
-                </div>
+            <!-- Gráfica de componentes a la derecha -->
+            <div class="chart-container">
+                <h3>Componentes Más Solicitados</h3>
+                <canvas id="componentesChart"></canvas>
             </div>
         </div>
 
@@ -191,11 +190,11 @@
         <div class="card">
             <h2>Gestión de Solicitudes Arduino</h2>
             
-            <div class="filter-tabs">
+            <div class="filters">
                 <button class="filter-btn-arduino active" data-filter="TODAS">Todas</button>
                 <button class="filter-btn-arduino" data-filter="PENDIENTE">Pendientes</button>
-                <button class="filter-btn-arduino" data-filter="ACEPTADO">Aprobadas</button>
-                <button class="filter-btn-arduino" data-filter="RECHAZADO">Rechazadas</button>
+                <button class="filter-btn-arduino" data-filter="APROBADA">Aprobadas</button>
+                <button class="filter-btn-arduino" data-filter="RECHAZADA">Rechazadas</button>
             </div>
 
             <div class="table-container">
@@ -229,43 +228,59 @@
     <!-- Modal Detalles -->
     <div id="detallesModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Detalles de la Solicitud</h2>
-            <div id="detallesContent"></div>
+            <div class="modal-header">
+                <h2>Detalles de la Solicitud</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="detallesContent"></div>
+            </div>
         </div>
     </div>
 
     <!-- Modal Aprobar -->
     <div id="aprobarModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Aprobar Solicitud</h2>
-            <form id="aprobarForm">
-                <div class="form-group">
-                    <label for="lugarAsignado">Lugar Asignado (Laboratorio/Sala) *</label>
-                    <input type="text" id="lugarAsignado" placeholder="Ej: Laboratorio 302" required>
-                </div>
-                <div class="form-group">
-                    <label for="notasAprobacion">Notas Adicionales</label>
-                    <textarea id="notasAprobacion" rows="3" placeholder="Instrucciones adicionales para el alumno..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">Confirmar Aprobación</button>
-            </form>
+            <div class="modal-header">
+                <h2>Aprobar Solicitud</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="aprobarForm">
+                    <div class="form-group">
+                        <label for="lugarAsignado">Lugar Asignado (Laboratorio/Sala) *</label>
+                        <input type="text" id="lugarAsignado" placeholder="Ej: Laboratorio 302" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notasAprobacion">Notas Adicionales</label>
+                        <textarea id="notasAprobacion" rows="3" placeholder="Instrucciones adicionales para el alumno..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success btn-large">Confirmar Aprobación</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- Modal Rechazar -->
     <div id="rechazarModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Rechazar Solicitud</h2>
-            <form id="rechazarForm">
-                <div class="form-group">
-                    <label for="motivoRechazo">Motivo del Rechazo *</label>
-                    <textarea id="motivoRechazo" rows="4" placeholder="Explica por qué se rechaza esta solicitud..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-danger">Confirmar Rechazo</button>
-            </form>
+            <div class="modal-header">
+                <h2>Rechazar Solicitud</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="rechazarForm">
+                    <div class="form-group">
+                        <label for="motivoRechazo">Motivo del Rechazo *</label>
+                        <textarea id="motivoRechazo" rows="4" placeholder="Explica por qué se rechaza esta solicitud..." required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger btn-large">Confirmar Rechazo</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -508,19 +523,10 @@
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
 
-            // Días de la semana
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            dayNames.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-day-header';
-                dayHeader.textContent = day;
-                grid.appendChild(dayHeader);
-            });
-
             // Espacios vacíos antes del primer día
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
-                emptyDay.className = 'calendar-day empty';
+                emptyDay.className = 'calendar-day other-month';
                 grid.appendChild(emptyDay);
             }
 
@@ -529,9 +535,8 @@
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 // Buscar solicitudes aceptadas para esta fecha (solo solicitudes de SERVIDORES)
-                // Asegurarse que tengan el campo 'servidor' definido para excluir arduino
                 const solicitudesDelDia = serverSolicitudes.filter(s =>
-                    s.estado === 'ACEPTADO' && s.fecha === dateStr && s.servidor
+                    s.estado === 'APROBADA' && s.fecha === dateStr && s.servidor
                 );
 
                 const dayCell = document.createElement('div');
@@ -540,16 +545,13 @@
                 // Marcar día actual
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
-                    dayCell.classList.add('today');
+                    dayCell.style.background = 'var(--upt-amarillo)';
+                    dayCell.style.fontWeight = '700';
                 }
 
                 // Colorear según ocupación
                 if (solicitudesDelDia.length > 0) {
-                    if (solicitudesDelDia.length === 1) {
-                        dayCell.classList.add('occupied');
-                    } else {
-                        dayCell.classList.add('multiple');
-                    }
+                    dayCell.classList.add('has-solicitudes');
                     
                     // Tooltip con información
                     const servidoresInfo = solicitudesDelDia.map(s => 
@@ -557,17 +559,16 @@
                     ).join('\n');
                     dayCell.title = `${solicitudesDelDia.length} servidor(es) ocupado(s):\n${servidoresInfo}`;
                     
-                        // Click para mostrar detalles (usar solo solicitudes de servidores)
-                        dayCell.style.cursor = 'pointer';
-                        dayCell.addEventListener('click', () => {
-                            mostrarDetallesDia(dateStr, solicitudesDelDia);
-                        });
+                    // Click para mostrar detalles
+                    dayCell.addEventListener('click', () => {
+                        mostrarDetallesDia(dateStr, solicitudesDelDia);
+                    });
                 }
 
-                dayCell.innerHTML = `<span class="day-number">${day}</span>`;
-                if (solicitudesDelDia.length > 0) {
-                    dayCell.innerHTML += `<span class="day-count">${solicitudesDelDia.length}</span>`;
-                }
+                dayCell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    ${solicitudesDelDia.length > 0 ? `<div class="solicitud-count">${solicitudesDelDia.length} reservas</div>` : ''}
+                `;
 
                 grid.appendChild(dayCell);
             }
@@ -576,25 +577,65 @@
         // Mostrar detalles de un día específico
         function mostrarDetallesDia(fecha, solicitudes) {
             const content = document.getElementById('detallesContent');
-            // Filtrar por servidor por si acaso
             const serverOnly = (solicitudes || []).filter(s => s.servidor);
 
             if (serverOnly.length === 0) {
-                content.innerHTML = `<h3>Solicitudes para ${fecha}</h3><p>No hay solicitudes de servidores para este día.</p>`;
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <p class="empty-state-text">No hay solicitudes de servidores para este día</p>
+                        <p class="empty-state-subtext">Fecha: ${fecha}</p>
+                    </div>
+                `;
                 document.getElementById('detallesModal').style.display = 'block';
                 return;
             }
 
             content.innerHTML = `
-                <h3>Solicitudes para ${fecha}</h3>
-                ${serverOnly.map(s => `
-                    <div class="detalle-section" style="border-left: 4px solid #28a745; padding-left: 1rem; margin-bottom: 1rem;">
-                        <p><strong>Servidor:</strong> ${s.servidor}</p>
-                        <p><strong>Horario:</strong> ${s.horaEntrada}-${s.horaSalida}</p>
-                        <p><strong>Responsable:</strong> ${s.nombreResponsable} (${s.codigoResponsable})</p>
-                        <p><strong>Curso:</strong> ${s.curso}</p>
-                        <p><strong>Docente:</strong> ${s.docente}</p>
-                        <button class="btn btn-info btn-sm" onclick="window.verDetalles('${s.id}')">Ver más detalles</button>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha</span>
+                        <span class="detail-value">${fecha}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total de Reservas</span>
+                        <span class="detail-value">${serverOnly.length} servidor(es)</span>
+                    </div>
+                </div>
+                <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid var(--upt-gris-claro);">
+                ${serverOnly.map((s, index) => `
+                    <div class="solicitud-card" style="margin-bottom: 1rem;">
+                        <div class="solicitud-header">
+                            <h4 style="color: var(--upt-azul-oscuro); margin: 0;">Reserva ${index + 1}</h4>
+                        </div>
+                        <div class="solicitud-info">
+                            <div class="info-item">
+                                <span class="info-label">Servidor</span>
+                                <span class="info-value">${s.servidor}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Horario</span>
+                                <span class="info-value">${s.horaEntrada} - ${s.horaSalida}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Responsable</span>
+                                <span class="info-value">${s.nombreResponsable}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Código</span>
+                                <span class="info-value">${s.codigoResponsable}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Curso</span>
+                                <span class="info-value">${s.curso}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Docente</span>
+                                <span class="info-value">${s.docente}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-small" onclick="window.verDetalles('${s.id}')" style="margin-top: 1rem;">
+                            Ver Detalles Completos
+                        </button>
                     </div>
                 `).join('')}
             `;
@@ -649,10 +690,10 @@
                         <td>${s.servidor}</td>
                         <td><span class="status-badge ${statusClass}">${s.estado}</span></td>
                         <td class="action-btns">
-                            <button class="btn btn-info btn-sm" onclick="window.verDetalles('${s.id}')">👁️ Detalles</button>
+                            <button class="btn btn-info btn-sm" onclick="window.verDetalles('${s.id}')">Detalles</button>
                             ${s.estado === 'PENDIENTE' ? `
-                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobar('${s.id}')">✅ Aprobar</button>
-                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazar('${s.id}')">❌ Rechazar</button>
+                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobar('${s.id}')">Aprobar</button>
+                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazar('${s.id}')">Rechazar</button>
                             ` : ''}
                         </td>
                     </tr>
@@ -930,26 +971,20 @@
             const grid = document.getElementById('calendarGridArduino');
             grid.innerHTML = '';
 
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            dayNames.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-day-header';
-                dayHeader.textContent = day;
-                grid.appendChild(dayHeader);
-            });
-
+            // Espacios vacíos antes del primer día
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
-                emptyDay.className = 'calendar-day empty';
+                emptyDay.className = 'calendar-day other-month';
                 grid.appendChild(emptyDay);
             }
 
+            // Días del mes
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                // Buscar solicitudes Arduino aceptadas para esta fecha
+                // Buscar solicitudes Arduino aprobadas para esta fecha
                 const solicitudesDelDia = allSolicitudesArduino.filter(s =>
-                    s.estado === 'ACEPTADO' && s.fecha === dateStr
+                    s.estado === 'APROBADA' && s.fecha === dateStr
                 );
 
                 const dayCell = document.createElement('div');
@@ -957,28 +992,24 @@
 
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
-                    dayCell.classList.add('today');
+                    dayCell.style.background = 'var(--upt-amarillo)';
+                    dayCell.style.fontWeight = '700';
                 }
 
                 if (solicitudesDelDia.length > 0) {
-                    if (solicitudesDelDia.length === 1) {
-                        dayCell.classList.add('occupied');
-                    } else {
-                        dayCell.classList.add('multiple');
-                    }
+                    dayCell.classList.add('has-solicitudes');
 
                     const info = solicitudesDelDia.map(s => `${s.nombreResponsable} (${s.horaEntrada}-${s.horaSalida})`).join('\n');
                     dayCell.title = `${solicitudesDelDia.length} reserva(s) Arduino:\n${info}`;
-                    dayCell.style.cursor = 'pointer';
                     dayCell.addEventListener('click', () => {
                         mostrarDetallesDiaArduino(dateStr, solicitudesDelDia);
                     });
                 }
 
-                dayCell.innerHTML = `<span class="day-number">${day}</span>`;
-                if (solicitudesDelDia.length > 0) {
-                    dayCell.innerHTML += `<span class="day-count">${solicitudesDelDia.length}</span>`;
-                }
+                dayCell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    ${solicitudesDelDia.length > 0 ? `<div class="solicitud-count">${solicitudesDelDia.length} reservas</div>` : ''}
+                `;
 
                 grid.appendChild(dayCell);
             }
@@ -1058,10 +1089,10 @@
                         <td>${tipoTexto}</td>
                         <td><span class="status-badge ${statusClass}">${s.estado}</span></td>
                         <td class="action-btns">
-                            <button class="btn btn-info btn-sm" onclick="window.verDetallesArduino('${s.id}')">👁️ Detalles</button>
+                            <button class="btn btn-info btn-sm" onclick="window.verDetallesArduino('${s.id}')">Detalles</button>
                             ${s.estado === 'PENDIENTE' ? `
-                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobarArduino('${s.id}')">✅ Aprobar</button>
-                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazarArduino('${s.id}')">❌ Rechazar</button>
+                                <button class="btn btn-success btn-sm" onclick="window.abrirAprobarArduino('${s.id}')">Aprobar</button>
+                                <button class="btn btn-danger btn-sm" onclick="window.abrirRechazarArduino('${s.id}')">Rechazar</button>
                             ` : ''}
                         </td>
                     </tr>

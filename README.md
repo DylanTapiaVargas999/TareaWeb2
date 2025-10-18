@@ -1,6 +1,20 @@
-# Sistema de Gestión de Préstamo de Servidores
+# 📡 Sistema de Gestión de Préstamo de Equipos - UPT
 
-Sistema completo para la gestión de préstamo de servidores académicos con Firebase como backend.
+## Universidad Privada de Tacna
+
+![UPT Logo](https://pbs.twimg.com/profile_images/971067995215843329/OYOGVRee_400x400.jpg)
+
+Sistema profesional para la gestión de préstamos de servidores y kits Arduino de la Universidad Privada de Tacna, desarrollado con Firebase como backend.
+
+## 🎨 Diseño Institucional
+
+El sistema utiliza los colores oficiales de la Universidad Privada de Tacna:
+- **Azul Oscuro (#003D73)**: Color principal institucional
+- **Amarillo (#FFC600)**: Color de acento y destacado
+- **Blanco (#FFFFFF)**: Fondos y tarjetas
+- **Gris Claro (#F4F4F4)**: Fondos secundarios
+
+El diseño es limpio, profesional y completamente responsive.
 
 ## 🚀 Características
 
